@@ -3,124 +3,207 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dropvid — Instagram, Facebook & TikTok Video Downloader</title>
-<meta name="description" content="Paste a link from Instagram, Facebook or TikTok and download the video in one click.">
+<title>Dropvid — Instagram, Facebook & TikTok video downloader</title>
+<meta name="description" content="Paste a link from Instagram, Facebook or TikTok, pick a quality and save the MP4. No app, no sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dropvid — save videos from Instagram, Facebook & TikTok">
+<meta property="og:description" content="Paste a link, pick a quality, save the MP4. No app, no sign-up.">
+<meta name="theme-color" content="#0e0d0b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e0a44a'/%3E%3Cpath d='M16 8v11m0 0-5-5m5 5 5-5M10 24h12' stroke='%231a1307' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b0d13; --bg2:#10131b; --card:rgba(255,255,255,.035); --line:rgba(255,255,255,.08);
-    --text:#eef0f6; --muted:#8e94a6; --accent:#7c8cff; --accent2:#c084fc; --ok:#34d399; --err:#fb7185;
-    --r:16px; --shadow:0 30px 80px rgba(0,0,0,.55);
+    --bg:#0e0d0b; --raise:#161512; --surface:#1c1a17; --surface-2:#23211d;
+    --line:rgba(236,228,214,.08); --line-strong:rgba(236,228,214,.16);
+    --text:#ece6da; --muted:#9a9387; --faint:#6b665d;
+    --accent:#e0a44a; --accent-soft:rgba(224,164,74,.14); --accent-ink:#1a1307;
+    --ok:#9cc59a; --err:#e38b7b;
+    --shadow:0 24px 60px -20px rgba(8,6,2,.7), 0 2px 6px rgba(8,6,2,.35);
+    --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.2,.8,.2,1);
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
+  html{scroll-behavior:smooth}
   body{
-    margin:0; background:radial-gradient(1200px 600px at 50% -10%, #1b2040 0%, var(--bg) 55%);
-    color:var(--text); font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
+    margin:0; min-height:100dvh; color:var(--text); font:16px/1.6 var(--sans);
+    background:
+      radial-gradient(900px 520px at 12% -8%, rgba(224,164,74,.10), transparent 60%),
+      radial-gradient(700px 500px at 100% 30%, rgba(236,228,214,.035), transparent 65%),
+      var(--bg);
     -webkit-font-smoothing:antialiased;
   }
+  /* grain */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.06; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
   a{color:inherit}
-  .wrap{max-width:820px; margin:0 auto; padding:56px 20px 80px}
-  header{display:flex; align-items:center; justify-content:space-between; margin-bottom:56px}
-  .logo{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:-.01em}
-  .logo i{width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:grid; place-items:center}
-  .logo i::after{content:""; width:0; height:0; border-left:10px solid #fff; border-top:6px solid transparent; border-bottom:6px solid transparent; margin-left:3px}
-  header nav{display:flex; gap:18px; color:var(--muted); font-size:.92rem}
-  header nav a{text-decoration:none} header nav a:hover{color:var(--text)}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:6px}
+  .skip{position:absolute; left:16px; top:-60px; z-index:3; background:var(--accent); color:var(--accent-ink); padding:10px 14px; border-radius:8px; font-weight:600; text-decoration:none}
+  .skip:focus{top:16px}
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 
-  .hero h1{font-size:clamp(1.9rem,5vw,2.9rem); line-height:1.12; letter-spacing:-.03em; margin:0 0 12px; text-align:center}
-  .hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent}
-  .hero p{text-align:center; color:var(--muted); margin:0 auto 32px; max-width:520px}
-  .chips{display:flex; justify-content:center; gap:8px; margin-bottom:28px; flex-wrap:wrap}
-  .chip{font-size:.8rem; padding:6px 12px; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:var(--card); transition:.2s}
-  .chip.active{color:#fff; border-color:transparent}
-  .chip[data-p=instagram].active{background:linear-gradient(90deg,#f0589a,#f5a623)}
-  .chip[data-p=facebook].active{background:#1877f2}
-  .chip[data-p=tiktok].active{background:#111; box-shadow:0 0 0 1px #25f4ee inset, 2px 2px 0 #fe2c55}
+  .wrap{position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:28px 24px 96px}
+  header{display:flex; align-items:center; justify-content:space-between; margin-bottom:clamp(56px,10vw,112px)}
+  .logo{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.02em; font-size:1.05rem; text-decoration:none}
+  .logo svg{width:28px; height:28px; flex:none}
+  header nav{display:flex; gap:4px; font-size:.9rem}
+  header nav a{text-decoration:none; color:var(--muted); padding:6px 12px; border-radius:8px; transition:color .2s, background .2s}
+  header nav a:hover{color:var(--text); background:var(--surface)}
+
+  /* hero */
+  .hero{max-width:760px}
+  .eyebrow{font:500 .78rem/1 var(--mono); color:var(--accent); letter-spacing:.04em; margin:0 0 22px; display:flex; align-items:center; gap:10px}
+  .eyebrow::before{content:""; width:22px; height:1px; background:var(--accent)}
+  .hero h1{font-size:clamp(2.6rem,7.4vw,4.9rem); line-height:.98; letter-spacing:-.045em; font-weight:700; margin:0 0 22px; text-wrap:balance}
+  .hero h1 em{font-style:normal; color:var(--muted); font-weight:500}
+  .lede{color:var(--muted); font-size:1.08rem; max-width:52ch; margin:0 0 40px; text-wrap:pretty}
 
   .box{
-    display:flex; gap:8px; padding:8px; border-radius:calc(var(--r) + 4px); background:var(--bg2);
-    border:1px solid var(--line); box-shadow:var(--shadow); position:relative;
+    display:flex; gap:6px; padding:7px; border-radius:18px; background:var(--raise);
+    border:1px solid var(--line-strong); box-shadow:var(--shadow), inset 0 1px 0 rgba(236,228,214,.04);
+    transition:border-color .25s var(--ease), box-shadow .25s var(--ease);
   }
-  .box:focus-within{border-color:rgba(124,140,255,.6); box-shadow:var(--shadow),0 0 0 4px rgba(124,140,255,.15)}
-  .box input{
-    flex:1; min-width:0; background:transparent; border:0; outline:0; color:var(--text); font-size:1.02rem; padding:12px 14px;
-  }
-  .box input::placeholder{color:#5b6172}
+  .box:focus-within{border-color:rgba(224,164,74,.55); box-shadow:var(--shadow), 0 0 0 4px var(--accent-soft)}
+  .box input{flex:1; min-width:0; background:transparent; border:0; outline:0; color:var(--text); font:400 1.02rem var(--sans); padding:12px 14px}
+  .box input::placeholder{color:var(--faint)}
   .btn{
-    border:0; cursor:pointer; border-radius:12px; font-weight:600; font-size:.95rem; padding:0 18px; height:46px;
-    display:inline-flex; align-items:center; gap:8px; transition:.18s; white-space:nowrap; text-decoration:none;
+    border:0; cursor:pointer; border-radius:12px; font:600 .94rem var(--sans); padding:0 20px; height:48px;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; text-decoration:none;
+    transition:transform .18s var(--ease), background .2s, color .2s, box-shadow .2s, border-color .2s;
   }
-  .btn:disabled{opacity:.5; cursor:not-allowed}
-  .btn.ghost{background:transparent; color:var(--muted); border:1px solid var(--line)}
-  .btn.ghost:hover:not(:disabled){color:var(--text); background:rgba(255,255,255,.04)}
-  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 8px 24px rgba(124,140,255,.35)}
-  .btn.primary:hover:not(:disabled){transform:translateY(-1px); filter:brightness(1.08)}
-  .btn .spin{width:16px; height:16px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; display:none}
+  .btn:active:not(:disabled){transform:scale(.97)}
+  .btn:disabled{opacity:.55; cursor:not-allowed}
+  .btn.text{background:transparent; color:var(--muted); padding:0 14px}
+  .btn.text:hover:not(:disabled){color:var(--text); background:var(--surface)}
+  .btn.primary{background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 22px -8px rgba(224,164,74,.55)}
+  .btn.primary:hover:not(:disabled){background:#e8b35e; transform:translateY(-1px)}
+  .btn.primary:active:not(:disabled){transform:translateY(0) scale(.97)}
+  .btn.quiet{background:var(--surface-2); color:var(--text); border:1px solid var(--line)}
+  .btn.quiet:hover{border-color:rgba(224,164,74,.5); color:var(--accent)}
+  .btn .spin{width:16px; height:16px; border:2px solid rgba(26,19,7,.3); border-top-color:var(--accent-ink); border-radius:50%; animation:sp .7s linear infinite; display:none}
   .btn.loading .spin{display:inline-block} .btn.loading .lbl{display:none}
   @keyframes sp{to{transform:rotate(360deg)}}
 
-  .msg{margin:14px 4px 0; font-size:.92rem; color:var(--muted); min-height:1.4em; display:flex; align-items:center; gap:8px}
+  .below{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:16px 4px 0}
+  .chips{display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:.84rem; color:var(--faint)}
+  .chip{display:inline-flex; align-items:center; gap:7px; padding:5px 10px; border-radius:7px; color:var(--muted); transition:color .2s, background .2s}
+  .chip::before{content:""; width:6px; height:6px; border-radius:2px; background:var(--line-strong); transition:background .2s}
+  .chip.active{color:var(--text); background:var(--surface)}
+  .chip.active::before{background:var(--accent)}
+  .msg{font-size:.9rem; color:var(--muted); min-height:1.5em; margin:0}
   .msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
 
-  .result{
-    margin-top:28px; border:1px solid var(--line); border-radius:var(--r); background:var(--card); overflow:hidden;
-    opacity:0; transform:translateY(10px); transition:.35s; display:none;
-  }
-  .result.show{display:block; opacity:1; transform:none}
-  .result .top{display:flex; gap:18px; padding:20px}
-  .thumb{width:150px; aspect-ratio:1/1; border-radius:12px; object-fit:cover; background:#1a1d28; flex:none}
-  .meta{flex:1; min-width:0}
-  .meta .plat{font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:700}
-  .meta h2{margin:6px 0 6px; font-size:1.08rem; line-height:1.35; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
-  .meta .by{color:var(--muted); font-size:.9rem}
+  /* result + skeleton */
+  .result,.skel{margin-top:36px; border-radius:20px; background:var(--surface); border:1px solid var(--line); overflow:hidden; box-shadow:var(--shadow); display:none}
+  .result.show,.skel.show{display:block; animation:rise .45s var(--ease) both}
+  @keyframes rise{from{opacity:0; transform:translateY(12px)}}
+  .top{display:grid; grid-template-columns:168px 1fr; gap:22px; padding:22px}
+  .thumb{width:100%; aspect-ratio:4/5; border-radius:12px; object-fit:cover; background:var(--surface-2); display:block}
+  .meta{min-width:0; padding-top:4px}
+  .plat{font:500 .76rem var(--mono); color:var(--accent)}
+  .meta h2{margin:8px 0 10px; font-size:1.2rem; line-height:1.3; letter-spacing:-.02em; font-weight:600; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .by{color:var(--muted); font-size:.9rem; font-variant-numeric:tabular-nums}
   .formats{border-top:1px solid var(--line)}
-  .fmt{display:flex; align-items:center; gap:14px; padding:14px 20px; border-bottom:1px solid var(--line)}
+  .fmt{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:18px; padding:14px 22px; border-bottom:1px solid var(--line); transition:background .2s}
+  .fmt:hover{background:rgba(236,228,214,.02)}
   .fmt:last-child{border-bottom:0}
-  .fmt .q{font-weight:600; min-width:70px}
-  .fmt .d{color:var(--muted); font-size:.88rem; flex:1}
-  .fmt .tag{font-size:.7rem; padding:2px 8px; border-radius:999px; background:rgba(52,211,153,.12); color:var(--ok); margin-left:8px}
-  .fmt .btn{height:38px; padding:0 14px; font-size:.88rem}
-  .foot{padding:12px 20px; font-size:.82rem; color:var(--muted); background:rgba(0,0,0,.2); display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
-  .foot a{color:var(--accent); text-decoration:none}
+  .q{font:500 .98rem var(--mono); min-width:72px; font-variant-numeric:tabular-nums}
+  .d{color:var(--muted); font-size:.86rem; font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .tag{font:500 .68rem var(--mono); padding:3px 6px; border-radius:4px; background:var(--accent-soft); color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
+  .fmt .btn{height:40px; padding:0 16px; font-size:.88rem; border-radius:10px}
+  .foot{padding:14px 22px 16px; font-size:.84rem; color:var(--muted); background:var(--raise); display:flex; justify-content:space-between; gap:10px 24px; flex-wrap:wrap; border-top:1px solid var(--line)}
+  .foot a{color:var(--accent); text-underline-offset:3px}
+  .skel .top{align-items:start}
+  .sk{background:linear-gradient(90deg,var(--surface-2) 0%,#2b2924 45%,var(--surface-2) 90%); background-size:220% 100%; animation:shim 1.3s linear infinite; border-radius:8px}
+  .sk.thumb{border-radius:12px}
+  .sk.line{height:14px; margin:10px 0}
+  .skel .fmt{padding:16px 22px}
+  @keyframes shim{from{background-position:120% 0} to{background-position:-120% 0}}
 
-  .how{margin-top:64px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
-  .how div{padding:18px; border:1px solid var(--line); border-radius:14px; background:var(--card)}
-  .how b{display:block; margin-bottom:4px} .how p{margin:0; color:var(--muted); font-size:.9rem}
-  .how em{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:8px; background:rgba(124,140,255,.15); color:var(--accent); font-style:normal; font-weight:700; font-size:.85rem; margin-bottom:10px}
-  footer{margin-top:56px; text-align:center; color:#5b6172; font-size:.82rem; line-height:1.7}
+  /* sections */
+  section.block{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.9fr); gap:40px 64px; margin-top:clamp(96px,14vw,160px); padding-top:40px; border-top:1px solid var(--line)}
+  .block h2{font-size:clamp(1.6rem,3vw,2.1rem); line-height:1.08; letter-spacing:-.035em; font-weight:600; margin:0; text-wrap:balance}
+  .block .side p{color:var(--muted); margin:14px 0 0; max-width:30ch}
+  .steps{list-style:none; margin:0; padding:0; counter-reset:s}
+  .steps li{counter-increment:s; display:grid; grid-template-columns:56px 1fr; gap:4px 12px; padding:22px 0 24px; border-bottom:1px solid var(--line)}
+  .steps li:first-child{padding-top:4px}
+  .steps li::before{content:"0" counter(s); font:500 .86rem var(--mono); color:var(--accent); grid-row:span 2; padding-top:3px}
+  .steps b{font-weight:600; font-size:1.06rem; letter-spacing:-.01em}
+  .steps p{margin:0; color:var(--muted); max-width:58ch}
+  .faq{margin:0}
+  .faq div{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr); gap:8px 32px; padding:20px 0 22px; border-bottom:1px solid var(--line)}
+  .faq div:first-child{padding-top:4px}
+  .faq dt{font-weight:500; letter-spacing:-.01em}
+  .faq dd{margin:0; color:var(--muted); text-wrap:pretty}
 
-  @media (max-width:600px){
-    .wrap{padding-top:32px} header{margin-bottom:36px} header nav{display:none}
-    .box{flex-wrap:wrap} .box input{width:100%; flex:1 0 100%} .box .btn{flex:1}
-    .result .top{flex-direction:column} .thumb{width:100%; aspect-ratio:16/9}
-    .how{grid-template-columns:1fr}
+  footer{margin-top:96px; padding-top:28px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:16px 40px; flex-wrap:wrap; color:var(--faint); font-size:.84rem; line-height:1.7}
+  footer p{margin:0; max-width:60ch}
+  footer nav{display:flex; gap:20px}
+  footer nav a{text-decoration:none; color:var(--muted)} footer nav a:hover{color:var(--text)}
+
+  @media (max-width:720px){
+    .wrap{padding:20px 16px 72px}
+    header nav a:first-child{display:none}
+    .box{flex-wrap:wrap} .box input{flex:1 0 100%} .box .btn.primary{flex:1}
+    .top{grid-template-columns:1fr} .thumb{aspect-ratio:16/10}
+    .fmt{grid-template-columns:1fr auto; gap:4px 14px; padding:14px 18px}
+    .fmt .d{grid-column:1; grid-row:2}
+    .fmt .btn{grid-row:span 2}
+    section.block{grid-template-columns:1fr}
+    .faq div{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before{animation:none !important; transition:none !important}
+    html{scroll-behavior:auto}
   }
 </style>
 </head>
 <body>
+<a class="skip" href="#url">Skip to the link box</a>
 <div class="wrap">
   <header>
-    <div class="logo"><i></i> Dropvid</div>
-    <nav><a href="#how">How it works</a><a href="#faq">FAQ</a></nav>
+    <a class="logo" href="/" aria-label="Dropvid home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#e0a44a"/><path d="M16 8v11m0 0-5-5m5 5 5-5M10 24h12" stroke="#1a1307" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Dropvid
+    </a>
+    <nav aria-label="Page sections"><a href="#how">How it works</a><a href="#faq">FAQ</a></nav>
   </header>
 
-  <section class="hero">
-    <h1>Download videos from <span>Instagram, Facebook & TikTok</span></h1>
-    <p>Paste a link, pick a quality, save the MP4. No app, no sign-up, no watermark on the file we serve.</p>
-    <div class="chips">
-      <span class="chip" data-p="instagram">Instagram</span>
-      <span class="chip" data-p="facebook">Facebook</span>
-      <span class="chip" data-p="tiktok">TikTok</span>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Free video downloader</p>
+      <h1>Paste a link. <em>Keep the video.</em></h1>
+      <p class="lede">Works with public reels, posts and TikToks. Pick a quality and the MP4 lands in your downloads. No app, no sign-up.</p>
+
+      <form class="box" id="form" autocomplete="off">
+        <label for="url" class="sr-only">Video link</label>
+        <input id="url" type="url" placeholder="https://www.instagram.com/reel/…" spellcheck="false" required>
+        <button type="button" class="btn text" id="paste" title="Paste from clipboard">Paste</button>
+        <button type="submit" class="btn primary" id="go"><span class="spin"></span><span class="lbl">Get video</span></button>
+      </form>
+      <div class="below">
+        <div class="chips" aria-label="Supported platforms">
+          <span class="chip" data-p="instagram">Instagram</span>
+          <span class="chip" data-p="facebook">Facebook</span>
+          <span class="chip" data-p="tiktok">TikTok</span>
+        </div>
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <div class="skel" id="skel" aria-hidden="true">
+      <div class="top">
+        <div class="sk thumb"></div>
+        <div class="meta"><div class="sk line" style="width:18%"></div><div class="sk line" style="width:86%;height:18px"></div><div class="sk line" style="width:62%;height:18px"></div><div class="sk line" style="width:30%"></div></div>
+      </div>
+      <div class="formats"><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:40%"></div><div class="sk" style="width:104px;height:40px"></div></div><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:32%"></div><div class="sk" style="width:104px;height:40px"></div></div></div>
     </div>
 
-    <form class="box" id="form" autocomplete="off">
-      <input id="url" type="url" placeholder="Paste a video link here…" spellcheck="false" required>
-      <button type="button" class="btn ghost" id="paste" title="Paste from clipboard">Paste</button>
-      <button type="submit" class="btn primary" id="go"><span class="spin"></span><span class="lbl">Fetch video</span></button>
-    </form>
-    <div class="msg" id="msg"></div>
-
-    <div class="result" id="result">
+    <article class="result" id="result" aria-label="Video found">
       <div class="top">
         <img class="thumb" id="thumb" alt="">
         <div class="meta">
@@ -132,20 +215,40 @@
       <div class="formats" id="formats"></div>
       <div class="foot">
         <span>Download not starting? <a id="direct" href="#" target="_blank" rel="noopener">Open the video directly</a> and save it from there.</span>
-        <span id="expiry">Links expire after a while — fetch again if needed.</span>
+        <span id="expiry">Links expire after a while. Fetch again if one stops working.</span>
       </div>
-    </div>
-  </section>
+    </article>
 
-  <section class="how" id="how">
-    <div><em>1</em><b>Copy the link</b><p>Tap Share → Copy link on the post, reel, or video you want.</p></div>
-    <div><em>2</em><b>Paste it above</b><p>We detect the platform and fetch the available qualities.</p></div>
-    <div><em>3</em><b>Download</b><p>Choose HD or SD and the MP4 saves straight to your device.</p></div>
-  </section>
+    <section class="block" id="how">
+      <div class="side">
+        <h2>Three steps, no account</h2>
+        <p>Nothing to install. It works the same on a phone or a laptop.</p>
+      </div>
+      <ol class="steps">
+        <li><b>Copy the link</b><p>On the reel, post or video, tap Share, then Copy link.</p></li>
+        <li><b>Paste it above</b><p>Dropvid recognises the platform and lists every quality it can find.</p></li>
+        <li><b>Save the MP4</b><p>Pick a quality. The file goes straight to your downloads, named after the post.</p></li>
+      </ol>
+    </section>
 
-  <footer id="faq">
-    Works with public posts, reels, stories from public accounts, and TikTok videos.<br>
-    Only download content you own or have permission to save. Dropvid is not affiliated with Meta or ByteDance.
+    <section class="block" id="faq">
+      <div class="side">
+        <h2>Questions</h2>
+        <p>The short answers to what people ask most.</p>
+      </div>
+      <dl class="faq">
+        <div><dt>Which links work?</dt><dd>Public Instagram reels and posts, Facebook videos and reels, and TikTok videos, including short vm.tiktok.com links.</dd></div>
+        <div><dt>Why did a link fail?</dt><dd>The post may be private, deleted, or from an account that requires a login. Instagram also blocks some requests at busy times, so try again in a minute.</dd></div>
+        <div><dt>Where does the file go?</dt><dd>Your browser's normal downloads folder. On iPhone, open the Files app and look in Downloads.</dd></div>
+        <div><dt>Do you keep the videos?</dt><dd>No. The file streams through to you and isn't stored, and neither is the link you paste.</dd></div>
+        <div><dt>Is it free?</dt><dd>Yes, with no account and no download limit.</dd></div>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <p>Only download content you own or have permission to save. Dropvid is not affiliated with Meta or ByteDance.</p>
+    <nav aria-label="Footer"><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#top" onclick="scrollTo({top:0});return false">Back to top</a></nav>
   </footer>
 </div>
 
@@ -153,12 +256,13 @@
 (() => {
   const API = "/api";
   const $ = s => document.querySelector(s);
-  const urlEl = $("#url"), go = $("#go"), msg = $("#msg"), result = $("#result");
+  const urlEl = $("#url"), go = $("#go"), msg = $("#msg"), result = $("#result"), skel = $("#skel");
   const PLATFORMS = {
     instagram: /^https?:\/\/(www\.)?instagram\.com\//i,
     facebook:  /^https?:\/\/(www\.|m\.|web\.|fb\.)?(facebook\.com|fb\.watch)\//i,
     tiktok:    /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i,
   };
+  const NAMES = { instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok" };
   const detect = u => Object.keys(PLATFORMS).find(k => PLATFORMS[k].test(u)) || null;
 
   function setMsg(text, cls = "") { msg.textContent = text; msg.className = "msg " + cls; }
@@ -177,34 +281,36 @@
 
   $("#paste").addEventListener("click", async () => {
     try { urlEl.value = (await navigator.clipboard.readText()).trim(); urlEl.dispatchEvent(new Event("input")); urlEl.focus(); }
-    catch { setMsg("Clipboard access was blocked — paste manually with Ctrl/Cmd+V.", "err"); }
+    catch { setMsg("Clipboard access was blocked. Paste with Ctrl/Cmd+V instead.", "err"); }
   });
 
   $("#form").addEventListener("submit", async e => {
     e.preventDefault();
     const url = urlEl.value.trim();
     const platform = detect(url);
-    if (!platform) return setMsg("That doesn't look like an Instagram, Facebook or TikTok link.", "err");
+    if (!platform) return setMsg("That isn't an Instagram, Facebook or TikTok link.", "err");
 
     result.classList.remove("show");
+    skel.classList.add("show");
     go.disabled = true; go.classList.add("loading");
-    setMsg("Fetching video details…");
+    setMsg("Looking up the video…");
 
     try {
       const r = await fetch(`${API}/resolve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
-      const data = await r.json().catch(() => ({ error: "Server returned an unexpected response." }));
+      const data = await r.json().catch(() => ({ error: "The server sent an unexpected response. Try again." }));
       if (!r.ok) throw new Error(data.error || "Couldn't fetch this video.");
       render(data, platform);
-      setMsg("Ready — choose a quality below.", "ok");
+      setMsg("Ready. Choose a quality below.", "ok");
     } catch (err) {
-      setMsg(err.message, "err");
+      setMsg(err.message === "Failed to fetch" ? "Connection failed. Check your internet and try again." : err.message, "err");
     } finally {
+      skel.classList.remove("show");
       go.disabled = false; go.classList.remove("loading");
     }
   });
 
   function render(d, platform) {
-    $("#plat").textContent = d.platform || platform;
+    $("#plat").textContent = NAMES[d.platform || platform] || d.platform || platform;
     $("#title").textContent = d.title || "Untitled video";
     const bits = [];
     if (d.uploader) bits.push(d.uploader);
@@ -212,6 +318,7 @@
     $("#by").textContent = bits.join(" · ");
 
     const thumb = $("#thumb");
+    thumb.alt = `Thumbnail: ${d.title || "video"}`;
     if (d.thumbnail) { thumb.src = proxy(d.thumbnail, "", "", true); thumb.style.display = ""; }
     else thumb.style.display = "none";
 
@@ -222,7 +329,7 @@
       row.innerHTML = `
         <div class="q">${esc(f.label)}</div>
         <div class="d">${esc([f.ext?.toUpperCase(), fmtSize(f.filesize), f.note].filter(Boolean).join(" · "))}${i === 0 ? '<span class="tag">Best</span>' : ""}</div>
-        <a class="btn primary" download href="${esc(proxy(f.url, `${base}-${f.label.toLowerCase()}.${f.ext || "mp4"}`, f.h))}">Download</a>`;
+        <a class="btn ${i === 0 ? "primary" : "quiet"}" download href="${esc(proxy(f.url, `${base}-${f.label.toLowerCase()}.${f.ext || "mp4"}`, f.h))}">Download</a>`;
       list.appendChild(row);
     });
     $("#direct").href = d.formats?.[0]?.url || "#";
