@@ -42,6 +42,7 @@
   a{color:inherit}
   img,svg{display:block}
   :focus-visible{outline:2px solid var(--ink); outline-offset:3px; border-radius:8px}
+  [hidden]{display:none !important}
   .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
   .skip{position:absolute; left:16px; top:-60px; z-index:var(--z-skip); background:var(--ink); color:var(--white); padding:10px 14px; border-radius:10px; font-weight:600; text-decoration:none}
   .skip:focus{top:12px}
@@ -132,30 +133,108 @@
   @keyframes dash{to{stroke-dashoffset:-24}}
 
   /* ---------- result ---------- */
-  .result-wrap{max-width:880px; margin:8px auto 0}
-  .result,.skel{border-radius:var(--r-lg); background:var(--white); border:1px solid var(--line); overflow:hidden; box-shadow:var(--shadow-lg); display:none}
-  .result.show,.skel.show{display:block; animation:rise .45s var(--ease) both}
+  .result-wrap{max-width:1060px; margin:16px auto 0}
+  .result,.skel{position:relative; border-radius:28px; background:var(--white); border:1px solid var(--line); box-shadow:var(--shadow-lg); display:none; overflow:hidden}
+  .result.show,.skel.show{display:block; animation:rise .6s var(--ease) both}
   @keyframes rise{from{opacity:0; transform:translateY(12px)}}
-  .top{display:grid; grid-template-columns:176px 1fr; gap:24px; padding:24px}
-  .thumb{width:100%; aspect-ratio:4/5; border-radius:14px; object-fit:cover; background:var(--bg-2)}
-  .meta{min-width:0; padding-top:4px}
-  .plat{display:inline-flex; align-items:center; gap:7px; font:500 .8rem var(--mono); color:var(--ink-2); background:var(--bg); border:1px solid var(--line); padding:4px 10px 4px 7px; border-radius:999px}
-  .plat svg{width:15px; height:15px}
-  .plat[data-p=instagram] svg{fill:url(#g-ig)} .plat[data-p=facebook] svg{fill:var(--fb)} .plat[data-p=tiktok] svg{fill:var(--tt)}
-  .meta h2{margin:12px 0 10px; font-size:1.3rem; line-height:1.3; letter-spacing:-.02em; font-weight:600; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
-  .by{color:var(--muted); font-size:.92rem; font-variant-numeric:tabular-nums}
-  .formats{border-top:1px solid var(--line)}
-  .fmt{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:18px; padding:14px 24px; border-bottom:1px solid var(--line); transition:background .2s}
-  .fmt:hover{background:var(--surface)}
-  .fmt:last-child{border-bottom:0}
-  .q{font:500 1rem var(--mono); min-width:72px; font-variant-numeric:tabular-nums}
-  .d{color:var(--muted); font-size:.87rem; font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-  .tag{font:500 .68rem var(--mono); padding:3px 7px; border-radius:5px; background:var(--accent-wash); color:var(--accent-deep); text-transform:uppercase; letter-spacing:.06em}
-  .foot{padding:14px 24px 16px; font-size:.85rem; color:var(--muted); background:var(--surface); display:flex; justify-content:space-between; gap:8px 24px; flex-wrap:wrap; border-top:1px solid var(--line)}
+  .result::before{content:""; position:absolute; inset:0 0 auto 0; height:260px; pointer-events:none; background:radial-gradient(640px 260px at 18% -30%, var(--accent-wash), transparent 70%)}
+  .r-grid{position:relative; display:grid; grid-template-columns:minmax(0,330px) minmax(0,1fr); gap:32px; padding:28px}
+  /* wide videos: player across the top, details and download side by side below */
+  .result.landscape .r-grid{grid-template-columns:1fr; gap:26px}
+  .result.landscape .player{max-height:480px}
+  .result.landscape .r-body{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); grid-template-rows:auto auto auto 1fr; gap:20px 28px; align-items:start}
+  .result.landscape .r-body > :not(.r-side){grid-column:1}
+  .result.landscape .r-side{grid-column:2; grid-row:1 / 5}
+
+  /* media */
+  .r-media{display:flex; flex-direction:column; gap:12px; min-width:0}
+  .player{position:relative; width:100%; aspect-ratio:var(--ar,9/16); max-height:600px; border-radius:20px; overflow:hidden; background:#1c1a15; isolation:isolate; box-shadow:0 30px 60px -28px rgba(60,44,20,.6), 0 0 0 1px rgba(23,21,15,.06)}
+  .player img,.player video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+  .player video{object-fit:contain; background:#0e0d0b; z-index:3}
+  .player::after{content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:linear-gradient(180deg,rgba(0,0,0,.32),transparent 24%,transparent 62%,rgba(0,0,0,.5)); transition:opacity .4s}
+  .play{position:absolute; left:50%; top:50%; translate:-50% -50%; z-index:2; width:74px; height:74px; border-radius:50%; border:0; cursor:pointer; color:var(--ink); background:rgba(255,255,255,.94); display:grid; place-items:center; box-shadow:0 14px 34px rgba(0,0,0,.32); transition:transform .45s cubic-bezier(.34,1.56,.64,1), opacity .3s}
+  .play::before{content:""; position:absolute; inset:-9px; border-radius:50%; border:2px solid rgba(255,255,255,.65); animation:ring 2.2s cubic-bezier(.16,1,.3,1) infinite}
+  @keyframes ring{from{scale:.82; opacity:1} to{scale:1.4; opacity:0}}
+  .play:hover{transform:scale(1.08)}
+  .play .i{width:28px; height:28px; margin-left:4px}
+  .play-hint{position:absolute; left:50%; top:calc(50% + 56px); translate:-50% 0; z-index:2; font-size:.78rem; font-weight:500; color:#fff; text-shadow:0 1px 8px rgba(0,0,0,.5); white-space:nowrap}
+  .badge{position:absolute; z-index:2; display:inline-flex; align-items:center; gap:6px; padding:6px 11px 6px 8px; border-radius:999px; font:500 .76rem var(--mono); background:rgba(255,255,255,.94); color:var(--ink); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); transition:opacity .3s}
+  .badge svg{width:14px; height:14px}
+  .badge.plat{top:12px; left:12px}
+  .badge.plat[data-p=instagram] svg{fill:url(#g-ig)} .badge.plat[data-p=facebook] svg{fill:var(--fb)} .badge.plat[data-p=tiktok] svg{fill:var(--tt)}
+  .badge.dur{bottom:12px; right:12px; padding:5px 9px; background:rgba(14,13,11,.72); color:#fff}
+  .player.playing::after,.player.playing .play,.player.playing .play-hint,.player.playing .badge{opacity:0; pointer-events:none}
+  .media-meta{display:flex; justify-content:space-between; gap:8px; padding:0 4px; font:400 .76rem var(--mono); color:var(--muted)}
+
+  /* body */
+  .r-body{min-width:0; display:flex; flex-direction:column; gap:20px}
+  .r-head{display:flex; align-items:center; gap:12px}
+  .avatar{width:46px; height:46px; flex:none; border-radius:14px; display:grid; place-items:center; font-weight:600; font-size:1.1rem; color:#fff; text-transform:uppercase; background:linear-gradient(135deg,#efb04d,#b8601c); box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+  .who{min-width:0; flex:1}
+  .who b{display:block; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .who span{display:block; font-size:.85rem; color:var(--muted)}
+  .icon-btn{width:42px; height:42px; flex:none; border-radius:12px; border:1px solid var(--line-2); background:var(--white); color:var(--ink-2); display:grid; place-items:center; cursor:pointer; transition:transform .35s cubic-bezier(.34,1.56,.64,1), border-color .2s, color .2s}
+  .icon-btn:hover{border-color:var(--ink); color:var(--ink); transform:translateY(-2px)}
+  .icon-btn .i{width:19px; height:19px}
+  .r-title{margin:0; font-size:clamp(1.3rem,2.3vw,1.65rem); line-height:1.22; letter-spacing:-.03em; font-weight:600; text-wrap:balance; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .stats{display:flex; flex-wrap:wrap; gap:8px; margin:-6px 0 0; padding:0; list-style:none}
+  .stats:empty{display:none}
+  .stats li{display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:10px; background:var(--bg); border:1px solid var(--line); font-size:.85rem; color:var(--muted); font-variant-numeric:tabular-nums}
+  .stats li b{font-weight:600; color:var(--ink)}
+  .stats .i{width:16px; height:16px}
+  .stats .likes .i{color:#e1306c}
+
+  .block{border:1px solid var(--line); border-radius:18px; background:var(--surface); padding:16px 18px 18px}
+  .block-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px}
+  .block-head > span{display:inline-flex; align-items:center; gap:8px; font:500 .74rem var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+  .block-head > span .i{width:15px; height:15px}
+  .copy-btn{display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--white); color:var(--ink); font:600 .8rem var(--sans); cursor:pointer; transition:background .25s, border-color .25s, color .25s, transform .3s cubic-bezier(.34,1.56,.64,1)}
+  .copy-btn:hover:not(:disabled){border-color:var(--ink); transform:translateY(-1px)}
+  .copy-btn:active:not(:disabled){transform:scale(.96)}
+  .copy-btn:disabled{opacity:.45; cursor:not-allowed}
+  .copy-btn .i{width:15px; height:15px}
+  .copy-btn .i-done,.copy-btn.done .i-copy{display:none}
+  .copy-btn.done .i-done{display:block; animation:iconIn .5s cubic-bezier(.34,1.56,.64,1)}
+  .copy-btn.done{background:var(--ok-wash); border-color:#b9dcc2; color:var(--ok)}
+  .caption{margin:0; position:relative; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--ink-2); font-size:.95rem; line-height:1.65; max-height:calc(1.65em * 4 + 2px); overflow:hidden; transition:max-height .55s cubic-bezier(.16,1,.3,1)}
+  .caption.clamped::after{content:""; position:absolute; left:0; right:0; bottom:0; height:2.4em; background:linear-gradient(rgba(255,253,249,0),var(--surface)); transition:opacity .3s}
+  .caption.open::after{opacity:0}
+  .caption .ht{color:var(--accent-deep); font-weight:500}
+  .caption .none{color:var(--faint); font-style:italic}
+  .more{display:inline-flex; align-items:center; gap:4px; margin-top:8px; padding:0; border:0; background:none; font:600 .84rem var(--sans); color:var(--ink); cursor:pointer}
+  .more .i{width:14px; height:14px; transition:transform .35s cubic-bezier(.16,1,.3,1)}
+  .more[aria-expanded=true] .i{transform:rotate(180deg)}
+  .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px}
+  .tags:empty{display:none}
+  .tags button{border:1px solid var(--accent-wash-2); background:var(--accent-wash); color:var(--accent-deep); font:500 .8rem var(--sans); padding:4px 10px; border-radius:999px; cursor:pointer; transition:background .2s, transform .3s cubic-bezier(.34,1.56,.64,1)}
+  .tags button:hover{background:var(--accent-wash-2); transform:translateY(-2px)}
+  .tags button.all{background:var(--white); border-color:var(--line-2); color:var(--ink)}
+
+  .q-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:8px}
+  .q-opt{position:relative; text-align:left; border:1.5px solid var(--line); background:var(--white); border-radius:14px; padding:12px 14px; font:inherit; color:inherit; cursor:pointer; transition:border-color .25s, box-shadow .25s, transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .q-opt:hover{border-color:var(--line-2); transform:translateY(-2px)}
+  .q-opt[aria-checked=true]{border-color:var(--ink); box-shadow:0 0 0 4px rgba(232,163,58,.24)}
+  .q-res{display:flex; align-items:center; gap:6px; font:600 1.05rem var(--mono); letter-spacing:-.02em}
+  .q-meta{display:block; margin-top:3px; font-size:.78rem; color:var(--muted); font-variant-numeric:tabular-nums}
+  .q-opt .dot{position:absolute; top:13px; right:12px; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--line-2); display:grid; place-items:center; transition:background .25s, border-color .25s}
+  .q-opt[aria-checked=true] .dot{background:var(--ink); border-color:var(--ink)}
+  .q-opt[aria-checked=true] .dot::after{content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); animation:chipPop .45s cubic-bezier(.34,1.56,.64,1)}
+  .tag{font:500 .64rem var(--mono); padding:2px 6px; border-radius:5px; background:var(--accent-wash); color:var(--accent-deep); text-transform:uppercase; letter-spacing:.06em}
+
+  .r-side{display:flex; flex-direction:column; gap:20px; min-width:0}
+  .r-actions{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  .btn.big{flex:1 1 280px; height:58px; padding:0 24px; font-size:1.02rem; border-radius:15px}
+  .btn.big small{font:400 .8rem var(--mono); opacity:.6}
+  .r-actions .btn.line,.r-actions .btn.ghost{height:58px; border-radius:15px}
+  .foot{position:relative; padding:14px 28px 16px; font-size:.85rem; color:var(--muted); background:var(--surface); display:flex; justify-content:space-between; gap:8px 24px; flex-wrap:wrap; border-top:1px solid var(--line)}
   .foot a{color:var(--ink); font-weight:500; text-underline-offset:3px}
+
+  .toast{position:fixed; left:50%; bottom:28px; z-index:40; translate:-50% 24px; opacity:0; display:flex; align-items:center; gap:10px; padding:12px 18px 12px 14px; border-radius:14px; background:var(--ink); color:#fff; font-size:.92rem; font-weight:500; box-shadow:var(--shadow-lg); pointer-events:none; transition:opacity .35s cubic-bezier(.16,1,.3,1), translate .55s cubic-bezier(.34,1.56,.64,1)}
+  .toast.show{opacity:1; translate:-50% 0}
+  .toast .i{width:18px; height:18px; color:var(--accent)}
+
   .sk{background:linear-gradient(90deg,var(--bg-2) 0%,#f7f2e8 45%,var(--bg-2) 90%); background-size:220% 100%; animation:shim 1.3s linear infinite; border-radius:8px}
   .sk.line{height:14px; margin:10px 0}
-  .skel .fmt{padding:16px 24px}
   @keyframes shim{from{background-position:120% 0} to{background-position:-120% 0}}
 
   /* ---------- sections ---------- */
@@ -339,11 +418,13 @@
   @keyframes msgIn{from{opacity:0; translate:-6px 0}}
 
   /* result */
-  .result.show .thumb{animation:thumbIn 1s var(--out) both}
-  @keyframes thumbIn{from{opacity:0; scale:1.08; filter:saturate(.4)}}
-  .result.show .meta > *{animation:rowIn .7s var(--out) both}
-  .result.show .meta > :nth-child(2){animation-delay:.08s} .result.show .meta > :nth-child(3){animation-delay:.16s}
-  .result.show .fmt{animation:rowIn .7s var(--out) both; animation-delay:calc(.2s + var(--i,0) * 80ms)}
+  .result.show .player{animation:thumbIn 1s var(--out) both}
+  @keyframes thumbIn{from{opacity:0; scale:1.04; filter:saturate(.3)}}
+  .result.show .r-body > *{animation:rowIn .75s var(--out) both}
+  .result.show .r-body > :nth-child(2){animation-delay:.06s} .result.show .r-body > :nth-child(3){animation-delay:.12s}
+  .result.show .r-body > :nth-child(4){animation-delay:.18s} .result.show .r-body > :nth-child(5){animation-delay:.24s} .result.show .r-body > :nth-child(6){animation-delay:.3s}
+  .result.show .q-opt{animation:rowIn .6s var(--out) both; animation-delay:calc(.3s + var(--i,0) * 60ms)}
+  .result.show .tags button{animation:rowIn .5s var(--out) both; animation-delay:calc(.35s + var(--i,0) * 35ms)}
   @keyframes rowIn{from{opacity:0; translate:0 12px}}
 
   /* spotlight border that follows the cursor */
@@ -425,6 +506,11 @@
     .t-fast{grid-column:span 2}
   }
   @media (max-width:860px){
+    .r-grid,.result.landscape .r-grid{grid-template-columns:1fr; gap:22px; padding:18px}
+    .player{max-height:none}
+    .r-media{width:100%; max-width:330px; margin:0 auto}
+    .result.landscape .r-media{max-width:none}
+    .result.landscape .r-body{display:flex}
     .nav{display:none; position:absolute; left:16px; right:16px; top:72px; flex-direction:column; align-items:stretch; background:var(--white); border:1px solid var(--line); border-radius:18px; padding:8px; box-shadow:var(--shadow-lg)}
     .nav.open{display:flex; animation:rise .3s var(--ease) both}
     .nav a{padding:13px 14px; border-radius:12px; font-size:1rem}
@@ -442,11 +528,11 @@
     .container{padding:0 16px}
     .hero{padding-top:28px}
     .box{flex-wrap:wrap} .box .field{flex:1 0 100%; padding:0 6px 0 10px} .box .btn.dark{flex:1}
-    .top{grid-template-columns:1fr; padding:18px} .thumb{aspect-ratio:16/10}
-    .fmt{grid-template-columns:1fr auto; gap:4px 14px; padding:14px 18px}
-    .fmt .d{grid-column:1; grid-row:2}
-    .fmt .btn{grid-row:span 2}
     .foot{padding:14px 18px}
+    .block{padding:14px 14px 16px}
+    .r-actions .btn.line,.r-actions .btn.ghost{flex:1 1 140px}
+    .toast{left:16px; right:16px; translate:0 24px; justify-content:center}
+    .toast.show{translate:0 0}
     .plats{grid-template-columns:1fr} .plats .plat-card:last-child{grid-column:auto}
     .bento{grid-template-columns:1fr}
     .t-quality,.t-a,.t-b,.t-c,.t-name,.t-priv,.t-fast{grid-column:auto}
@@ -467,30 +553,40 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="g-ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#feda75"/><stop offset=".25" stop-color="#fa7e1e"/><stop offset=".55" stop-color="#d62976"/><stop offset=".8" stop-color="#962fbf"/><stop offset="1" stop-color="#4f5bd5"/></linearGradient></defs>
 <symbol id="ph-android-logo" viewBox="0 0 256 256"><g fill="currentColor"><path d="M176,148a12,12,0,1,1-12-12A12,12,0,0,1,176,148ZM92,136a12,12,0,1,0,12,12A12,12,0,0,0,92,136Zm148,24v24a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V161.13A113.38,113.38,0,0,1,51.4,78.72L26.34,53.66A8,8,0,0,1,37.66,42.34L63.82,68.5a111.43,111.43,0,0,1,128.55-.19l26-26a8,8,0,0,1,11.32,11.32L204.82,78.5c.75.71,1.5,1.43,2.24,2.17A111.25,111.25,0,0,1,240,160Zm-16,0a96,96,0,0,0-96-96h-.34C74.91,64.18,32,107.75,32,161.13V184H224Z"/></g></symbol>
 <symbol id="ph-apple-logo" viewBox="0 0 256 256"><g fill="currentColor"><path d="M223.3,169.59a8.07,8.07,0,0,0-2.8-3.4C203.53,154.53,200,134.64,200,120c0-17.67,13.47-33.06,21.5-40.67a8,8,0,0,0,0-11.62C208.82,55.74,187.82,48,168,48a72.2,72.2,0,0,0-40,12.13,71.56,71.56,0,0,0-90.71,9.09A74.63,74.63,0,0,0,16,123.4a127.06,127.06,0,0,0,40.14,89.73A39.8,39.8,0,0,0,83.59,224h87.68a39.84,39.84,0,0,0,29.12-12.57,125,125,0,0,0,17.82-24.6C225.23,174,224.33,172,223.3,169.59Zm-34.63,30.94a23.76,23.76,0,0,1-17.4,7.47H83.59a23.82,23.82,0,0,1-16.44-6.51A111.14,111.14,0,0,1,32,123,58.5,58.5,0,0,1,48.65,80.47,54.81,54.81,0,0,1,88,64h.78A55.45,55.45,0,0,1,123,76.28a8,8,0,0,0,10,0A55.44,55.44,0,0,1,168,64a70.64,70.64,0,0,1,36,10.35c-13,14.52-20,30.47-20,45.65,0,23.77,7.64,42.73,22.18,55.3A105.82,105.82,0,0,1,188.67,200.53ZM128.23,30A40,40,0,0,1,167,0h1a8,8,0,0,1,0,16h-1a24,24,0,0,0-23.24,18,8,8,0,1,1-15.5-4Z"/></g></symbol>
+<symbol id="ph-arrow-counter-clockwise" viewBox="0 0 256 256"><g fill="currentColor"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></g></symbol>
 <symbol id="ph-arrow-right" viewBox="0 0 256 256"><g fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></g></symbol>
+<symbol id="ph-arrow-square-out" viewBox="0 0 256 256"><g fill="currentColor"><path d="M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"/></g></symbol>
 <symbol id="ph-bookmark-simple" viewBox="0 0 256 256"><g fill="currentColor"><path d="M184,32H72A16,16,0,0,0,56,48V224a8,8,0,0,0,12.24,6.78L128,193.43l59.77,37.35A8,8,0,0,0,200,224V48A16,16,0,0,0,184,32Zm0,177.57-51.77-32.35a8,8,0,0,0-8.48,0L72,209.57V48H184Z"/></g></symbol>
 <symbol id="ph-caret-down" viewBox="0 0 256 256"><g fill="currentColor"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></g></symbol>
+<symbol id="ph-chat-circle" viewBox="0 0 256 256"><g fill="currentColor"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></g></symbol>
+<symbol id="ph-check-circle" viewBox="0 0 256 256"><g fill="currentColor"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></g></symbol>
 <symbol id="ph-check" viewBox="0 0 256 256"><g fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></g></symbol>
 <symbol id="ph-clipboard-text" viewBox="0 0 256 256"><g fill="currentColor"><path d="M168,152a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,152Zm-8-40H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16Zm56-64V216a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V48A16,16,0,0,1,56,32H92.26a47.92,47.92,0,0,1,71.48,0H200A16,16,0,0,1,216,48ZM96,64h64a32,32,0,0,0-64,0ZM200,48H173.25A47.93,47.93,0,0,1,176,64v8a8,8,0,0,1-8,8H88a8,8,0,0,1-8-8V64a47.93,47.93,0,0,1,2.75-16H56V216H200Z"/></g></symbol>
+<symbol id="ph-copy" viewBox="0 0 256 256"><g fill="currentColor"><path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/></g></symbol>
 <symbol id="ph-device-mobile" viewBox="0 0 256 256"><g fill="currentColor"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/></g></symbol>
 <symbol id="ph-download-simple" viewBox="0 0 256 256"><g fill="currentColor"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></g></symbol>
 <symbol id="ph-eye-slash" viewBox="0 0 256 256"><g fill="currentColor"><path d="M53.92,34.62A8,8,0,1,0,42.08,45.38L61.32,66.55C25,88.84,9.38,123.2,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208a127.11,127.11,0,0,0,52.07-10.83l22,24.21a8,8,0,1,0,11.84-10.76Zm47.33,75.84,41.67,45.85a32,32,0,0,1-41.67-45.85ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.16,133.16,0,0,1,25,128c4.69-8.79,19.66-33.39,47.35-49.38l18,19.75a48,48,0,0,0,63.66,70l14.73,16.2A112,112,0,0,1,128,192Zm6-95.43a8,8,0,0,1,3-15.72,48.16,48.16,0,0,1,38.77,42.64,8,8,0,0,1-7.22,8.71,6.39,6.39,0,0,1-.75,0,8,8,0,0,1-8-7.26A32.09,32.09,0,0,0,134,96.57Zm113.28,34.69c-.42.94-10.55,23.37-33.36,43.8a8,8,0,1,1-10.67-11.92A132.77,132.77,0,0,0,231.05,128a133.15,133.15,0,0,0-23.12-30.77C185.67,75.19,158.78,64,128,64a118.37,118.37,0,0,0-19.36,1.57A8,8,0,1,1,106,49.79,134,134,0,0,1,128,48c34.88,0,66.57,13.26,91.66,38.35,18.83,18.83,27.3,37.62,27.65,38.41A8,8,0,0,1,247.31,131.26Z"/></g></symbol>
+<symbol id="ph-eye" viewBox="0 0 256 256"><g fill="currentColor"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"/></g></symbol>
 <symbol id="ph-file-video" viewBox="0 0 256 256"><g fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40v72a8,8,0,0,0,16,0V40h88V88a8,8,0,0,0,8,8h48V216h-8a8,8,0,0,0,0,16h8a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM155.88,145a8,8,0,0,0-8.12.22l-19.95,12.46A16,16,0,0,0,112,144H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h64a16,16,0,0,0,15.81-13.68l19.95,12.46A8,8,0,0,0,160,216V152A8,8,0,0,0,155.88,145ZM112,208H48V160h64v48Zm32-6.43-16-10V176.43l16-10Z"/></g></symbol>
 <symbol id="ph-film-strip" viewBox="0 0 256 256"><g fill="currentColor"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,88h80v80H40Zm96-16V56h32V72Zm-16,0H88V56h32Zm0,112v16H88V184Zm16,0h32v16H136Zm0-16V88h80v80Zm80-96H184V56h32ZM72,56V72H40V56ZM40,184H72v16H40Zm176,16H184V184h32v16Z"/></g></symbol>
 <symbol id="ph-folder-open" viewBox="0 0 256 256"><g fill="currentColor"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></g></symbol>
 <symbol id="ph-hand-grabbing" viewBox="0 0 256 256"><g fill="currentColor"><path d="M188,80a27.79,27.79,0,0,0-13.36,3.4,28,28,0,0,0-46.64-11A28,28,0,0,0,80,92v20H68a28,28,0,0,0-28,28v12a88,88,0,0,0,176,0V108A28,28,0,0,0,188,80Zm12,72a72,72,0,0,1-144,0V140a12,12,0,0,1,12-12H80v24a8,8,0,0,0,16,0V92a12,12,0,0,1,24,0v28a8,8,0,0,0,16,0V92a12,12,0,0,1,24,0v28a8,8,0,0,0,16,0V108a12,12,0,0,1,24,0Z"/></g></symbol>
+<symbol id="ph-heart" viewBox="0 0 256 256"><g fill="currentColor"><path d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z"/></g></symbol>
 <symbol id="ph-lightning" viewBox="0 0 256 256"><g fill="currentColor"><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></g></symbol>
 <symbol id="ph-link-simple" viewBox="0 0 256 256"><g fill="currentColor"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z"/></g></symbol>
+<symbol id="ph-play" viewBox="0 0 256 256"><g fill="currentColor"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></g></symbol>
 <symbol id="ph-share-network" viewBox="0 0 256 256"><g fill="currentColor"><path d="M176,160a39.89,39.89,0,0,0-28.62,12.09l-46.1-29.63a39.8,39.8,0,0,0,0-28.92l46.1-29.63a40,40,0,1,0-8.66-13.45l-46.1,29.63a40,40,0,1,0,0,55.82l46.1,29.63A40,40,0,1,0,176,160Zm0-128a24,24,0,1,1-24,24A24,24,0,0,1,176,32ZM64,152a24,24,0,1,1,24-24A24,24,0,0,1,64,152Zm112,72a24,24,0,1,1,24-24A24,24,0,0,1,176,224Z"/></g></symbol>
 <symbol id="ph-sliders-horizontal" viewBox="0 0 256 256"><g fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"/></g></symbol>
 <symbol id="ph-sparkle" viewBox="0 0 256 256"><g fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></g></symbol>
 <symbol id="ph-star4" viewBox="0 0 24 24"><g fill="currentColor"><path d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0Z"/></g></symbol>
+<symbol id="ph-text-align-left" viewBox="0 0 256 256"><g fill="currentColor"><path d="M32,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H40A8,8,0,0,1,32,64Zm8,48H168a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16Zm176,24H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Zm-48,40H40a8,8,0,0,0,0,16H168a8,8,0,0,0,0-16Z"/></g></symbol>
 <symbol id="ph-user-minus" viewBox="0 0 256 256"><g fill="currentColor"><path d="M256,136a8,8,0,0,1-8,8H200a8,8,0,0,1,0-16h48A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z"/></g></symbol>
 <symbol id="si-facebook" viewBox="0 0 24 24"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></symbol>
 <symbol id="si-instagram" viewBox="0 0 24 24"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></symbol>
 <symbol id="si-tiktok" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></symbol>
 </svg>
 <div class="progress" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><svg class="i"><use href="#ph-check-circle"/></svg><span></span></div>
 <a class="skip" href="#url">Skip to the link box</a>
 
 <header class="site-header" id="top">
@@ -639,23 +735,71 @@
     <div class="container">
       <div class="result-wrap">
         <div class="skel" id="skel" aria-hidden="true">
-          <div class="top">
-            <div class="sk" style="aspect-ratio:4/5;border-radius:14px"></div>
-            <div class="meta"><div class="sk line" style="width:22%;height:22px;border-radius:999px"></div><div class="sk line" style="width:86%;height:20px"></div><div class="sk line" style="width:60%;height:20px"></div><div class="sk line" style="width:30%"></div></div>
+          <div class="r-grid">
+            <div class="r-media"><div class="sk" style="aspect-ratio:9/16;max-height:520px;border-radius:20px"></div></div>
+            <div class="r-body">
+              <div style="display:flex;gap:12px;align-items:center"><div class="sk" style="width:46px;height:46px;border-radius:14px"></div><div style="flex:1"><div class="sk line" style="width:40%"></div><div class="sk line" style="width:25%;height:10px"></div></div></div>
+              <div><div class="sk line" style="width:92%;height:22px"></div><div class="sk line" style="width:64%;height:22px"></div></div>
+              <div style="display:flex;gap:8px"><div class="sk" style="width:96px;height:34px"></div><div class="sk" style="width:86px;height:34px"></div><div class="sk" style="width:96px;height:34px"></div></div>
+              <div class="sk" style="height:150px;border-radius:18px"></div>
+              <div class="sk" style="height:110px;border-radius:18px"></div>
+              <div class="sk" style="height:58px;border-radius:15px"></div>
+            </div>
           </div>
-          <div class="formats"><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:40%"></div><div class="sk" style="width:110px;height:40px"></div></div><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:32%"></div><div class="sk" style="width:110px;height:40px"></div></div></div>
         </div>
 
         <article class="result" id="result" aria-label="Video found">
-          <div class="top">
-            <img class="thumb" id="thumb" alt="">
-            <div class="meta">
-              <span class="plat" id="plat"></span>
-              <h2 id="title"></h2>
-              <div class="by" id="by"></div>
+          <div class="r-grid">
+            <div class="r-media">
+              <div class="player" id="player">
+                <img id="thumb" alt="">
+                <video id="vid" playsinline controls preload="none" hidden></video>
+                <span class="badge plat" id="plat"></span>
+                <span class="badge dur" id="dur"></span>
+                <button class="play" id="playBtn" type="button" aria-label="Preview the video"><svg class="i"><use href="#ph-play"/></svg></button>
+                <span class="play-hint" aria-hidden="true">Preview</span>
+              </div>
+              <div class="media-meta"><span id="dims"></span><span id="orient"></span></div>
+            </div>
+
+            <div class="r-body">
+              <div class="r-head">
+                <div class="avatar" id="avatar" aria-hidden="true"></div>
+                <div class="who"><b id="uploader"></b><span id="posted"></span></div>
+                <a class="icon-btn" id="source" href="#" target="_blank" rel="noopener" title="Open the original post" aria-label="Open the original post"><svg class="i"><use href="#ph-arrow-square-out"/></svg></a>
+              </div>
+
+              <h2 class="r-title" id="title"></h2>
+
+              <ul class="stats" id="stats"></ul>
+
+              <section class="block" aria-labelledby="capLabel">
+                <div class="block-head">
+                  <span id="capLabel"><svg class="i"><use href="#ph-text-align-left"/></svg>Caption</span>
+                  <button class="copy-btn" id="copyCap" type="button"><svg class="i i-copy"><use href="#ph-copy"/></svg><svg class="i i-done"><use href="#ph-check"/></svg><span class="lbl">Copy</span></button>
+                </div>
+                <p class="caption" id="caption"></p>
+                <button class="more" id="moreCap" type="button" aria-expanded="false" hidden><span>Show more</span><svg class="i"><use href="#ph-caret-down"/></svg></button>
+                <div class="tags" id="tags"></div>
+              </section>
+
+              <div class="r-side">
+              <section class="block" aria-labelledby="qLabel">
+                <div class="block-head">
+                  <span id="qLabel"><svg class="i"><use href="#ph-sliders-horizontal"/></svg>Quality</span>
+                  <span class="q-count" id="qCount" style="font-size:.8rem;color:var(--muted)"></span>
+                </div>
+                <div class="q-list" id="formats" role="radiogroup" aria-labelledby="qLabel"></div>
+              </section>
+
+              <div class="r-actions">
+                <a class="btn dark big shine" id="dlBtn" href="#" download><svg class="i dl"><use href="#ph-download-simple"/></svg><span id="dlLabel">Download</span><small id="dlSize"></small></a>
+                <button class="btn line" id="copyLink" type="button"><svg class="i"><use href="#ph-link-simple"/></svg>Copy post link</button>
+                <button class="btn ghost" id="again" type="button"><svg class="i"><use href="#ph-arrow-counter-clockwise"/></svg>New link</button>
+              </div>
+              </div>
             </div>
           </div>
-          <div class="formats" id="formats"></div>
           <div class="foot">
             <span>Download not starting? <a id="direct" href="#" target="_blank" rel="noopener">Open the video directly</a> and save it from there.</span>
             <span id="expiry">Links expire after a while. Fetch again if one stops working.</span>
@@ -1058,6 +1202,7 @@ addEventListener("DOMContentLoaded", () => {
     if (!platform) return setMsg("That isn't an Instagram, Facebook or TikTok link.", "err");
 
     result.classList.remove("show");
+    resetPlayer();
     skel.classList.add("show");
     go.disabled = true; go.classList.add("loading");
     setMsg("Looking up the video…");
@@ -1067,7 +1212,7 @@ addEventListener("DOMContentLoaded", () => {
       const data = await r.json().catch(() => ({ error: "The server sent an unexpected response. Try again." }));
       if (!r.ok) throw new Error(data.error || "Couldn't fetch this video.");
       render(data, platform);
-      setMsg("Ready. Choose a quality below.", "ok");
+      setMsg("Ready. Pick a quality and download.", "ok");
     } catch (err) {
       setMsg(err.message === "Failed to fetch" ? "Connection failed. Check your internet and try again." : err.message, "err");
     } finally {
@@ -1076,40 +1221,166 @@ addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // ---------- result card ----------
+  const player = $("#player"), vid = $("#vid"), thumb = $("#thumb"), capEl = $("#caption"), moreBtn = $("#moreCap");
+  const qList = $("#formats"), dlBtn = $("#dlBtn"), toastEl = $("#toast");
+  let fmts = [], current = null, baseName = "video", postUrl = "", captionText = "";
+
+  const compact = n => Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(n);
+  function fmtDate(s) {
+    if (!/^\d{8}$/.test(s || "")) return "";
+    return new Date(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6)).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+  const hashtags = t => [...new Set((t.match(/#[\p{L}\p{N}_]+/gu) || []))];
+  const captionHTML = t => esc(t).replace(/(^|[\s(])(#[\p{L}\p{N}_]+)/gu, '$1<span class="ht">$2</span>');
+
+  function toast(text) {
+    toastEl.querySelector("span").textContent = text;
+    toastEl.classList.add("show");
+    clearTimeout(toastEl._t); toastEl._t = setTimeout(() => toastEl.classList.remove("show"), 2000);
+  }
+  async function copyText(text, label, btn) {
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const ta = Object.assign(document.createElement("textarea"), { value: text });
+      ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); ta.remove();
+    }
+    toast(label);
+    if (btn) {
+      const lbl = btn.querySelector(".lbl");
+      if (lbl) { btn.dataset.lbl ||= lbl.textContent; lbl.textContent = "Copied"; }
+      btn.classList.add("done");
+      clearTimeout(btn._t);
+      btn._t = setTimeout(() => { btn.classList.remove("done"); if (lbl) lbl.textContent = btn.dataset.lbl; }, 1800);
+    }
+  }
+
+  function resetPlayer() {
+    vid.pause(); vid.removeAttribute("src"); vid.load(); vid.hidden = true;
+    player.classList.remove("playing");
+  }
+  $("#playBtn").addEventListener("click", () => {
+    if (!current) return;
+    vid.src = proxy(current.url, "", current.h, true);
+    if (thumb.src) vid.poster = thumb.src;
+    vid.hidden = false; player.classList.add("playing");
+    vid.play().catch(() => {});
+  });
+
+  function select(i) {
+    current = fmts[i];
+    [...qList.children].forEach((b, j) => { b.setAttribute("aria-checked", String(i === j)); b.tabIndex = i === j ? 0 : -1; });
+    dlBtn.href = proxy(current.url, `${baseName}-${current.label.toLowerCase()}.${current.ext || "mp4"}`, current.h);
+    $("#dlLabel").textContent = `Download ${current.label}`;
+    $("#dlSize").textContent = fmtSize(current.filesize) || (current.ext || "mp4").toUpperCase();
+    $("#direct").href = current.url;
+    $("#dims").textContent = current.width && current.height ? `${current.width} × ${current.height}` : "";
+  }
+  qList.addEventListener("click", e => { const b = e.target.closest(".q-opt"); if (b) select(+b.dataset.i); });
+  qList.addEventListener("keydown", e => {
+    const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!d || !fmts.length) return;
+    e.preventDefault();
+    const i = (fmts.indexOf(current) + d + fmts.length) % fmts.length;
+    select(i); qList.children[i].focus();
+  });
+
+  $("#copyCap").addEventListener("click", e => copyText(captionText, "Caption copied", e.currentTarget));
+  $("#copyLink").addEventListener("click", () => copyText(postUrl, "Post link copied"));
+  $("#tags").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    copyText(b.dataset.copy, b.classList.contains("all") ? "All hashtags copied" : `${b.dataset.copy} copied`);
+  });
+  moreBtn.addEventListener("click", () => {
+    const open = moreBtn.getAttribute("aria-expanded") !== "true";
+    capEl.style.maxHeight = open ? capEl.scrollHeight + "px" : "";
+    capEl.classList.toggle("open", open);
+    moreBtn.setAttribute("aria-expanded", String(open));
+    moreBtn.querySelector("span").textContent = open ? "Show less" : "Show more";
+  });
+  $("#again").addEventListener("click", () => {
+    resetPlayer(); result.classList.remove("show");
+    urlEl.value = ""; highlight(null); setMsg("");
+    scrollToTarget(0);
+    setTimeout(() => urlEl.focus({ preventScroll: true }), reduce ? 0 : 700);
+  });
+
   function render(d, platform) {
     skel.classList.remove("show");
+    resetPlayer();
     const p = NAMES[d.platform] ? d.platform : platform;
+    fmts = d.formats || [];
+    const f0 = fmts[0] || {};
+
+    // media
     const plat = $("#plat");
     plat.dataset.p = p;
     plat.innerHTML = `<svg aria-hidden="true"><use href="#si-${p}"/></svg>${NAMES[p]}`;
-    $("#title").textContent = d.title || "Untitled video";
-    const bits = [];
-    if (d.uploader) bits.push(d.uploader);
-    if (d.duration) bits.push(fmtDur(d.duration));
-    $("#by").textContent = bits.join(" · ");
+    $("#dur").textContent = fmtDur(d.duration); $("#dur").hidden = !d.duration;
+    const w = f0.width, h = f0.height;
+    player.style.setProperty("--ar", w && h ? `${w} / ${h}` : "9 / 16");
+    result.classList.toggle("landscape", !!(w && h && w > h));
+    $("#orient").textContent = w && h ? (w > h ? "Landscape" : w < h ? "Vertical" : "Square") : "";
+    if (d.thumbnail) { thumb.src = proxy(d.thumbnail, "", "", true); thumb.hidden = false; }
+    else { thumb.removeAttribute("src"); thumb.hidden = true; }
 
-    const thumb = $("#thumb");
-    thumb.alt = `Thumbnail: ${d.title || "video"}`;
-    if (d.thumbnail) { thumb.src = proxy(d.thumbnail, "", "", true); thumb.style.display = ""; }
-    else thumb.style.display = "none";
+    // who and when
+    const handle = (d.uploader || "").trim();
+    const name = handle ? (p === "facebook" || /\s/.test(handle) || handle.startsWith("@") ? handle : "@" + handle) : `${NAMES[p]} creator`;
+    $("#avatar").textContent = name.replace(/^@/, "").charAt(0) || "?";
+    $("#uploader").textContent = name;
+    const date = fmtDate(d.upload_date);
+    $("#posted").textContent = date ? `Posted ${date}` : `On ${NAMES[p]}`;
+    postUrl = d.webpage_url || urlEl.value.trim();
+    $("#source").href = postUrl;
 
-    const base = slug(d.title);
-    const list = $("#formats"); list.innerHTML = "";
-    (d.formats || []).forEach((f, i) => {
-      const row = document.createElement("div"); row.className = "fmt";
-      row.innerHTML = `
-        <div class="q">${esc(f.label)}</div>
-        <div class="d">${esc([f.ext?.toUpperCase(), fmtSize(f.filesize), f.note].filter(Boolean).join(" · "))}${i === 0 ? '<span class="tag">Best</span>' : ""}</div>
-        <a class="btn sm ${i === 0 ? "dark" : "line"}" download href="${esc(proxy(f.url, `${base}-${f.label.toLowerCase()}.${f.ext || "mp4"}`, f.h))}"><svg class="i dl" aria-hidden="true"><use href="#ph-download-simple"/></svg>Download</a>`;
-      row.style.setProperty("--i", i);
-      list.appendChild(row);
-    });
-    $("#direct").href = d.formats?.[0]?.url || "#";
+    // title: TikTok and Instagram titles are often just the caption cut short
+    captionText = (d.description || "").trim();
+    let title = (d.title || "").trim();
+    const core = title.replace(/(\.\.\.|…)$/, "").trim();
+    if (!title || /^video by /i.test(title) || (captionText && core && captionText.startsWith(core))) title = `${NAMES[p]} video by ${name}`;
+    $("#title").textContent = title;
+    thumb.alt = `Thumbnail: ${title}`;
+
+    // stats
+    const stats = [
+      ["views", "ph-eye", d.view_count, "views"],
+      ["likes", "ph-heart", d.like_count, "likes"],
+      ["comments", "ph-chat-circle", d.comment_count, "comments"],
+    ].filter(s => s[2] != null);
+    $("#stats").innerHTML = stats.map(([cls, icon, n, word]) =>
+      `<li class="${cls}"><svg class="i" aria-hidden="true"><use href="#${icon}"/></svg><b>${compact(n)}</b>${word}</li>`).join("");
+
+    // caption
+    capEl.style.maxHeight = ""; capEl.classList.remove("open", "clamped");
+    moreBtn.setAttribute("aria-expanded", "false"); moreBtn.querySelector("span").textContent = "Show more";
+    capEl.innerHTML = captionText ? captionHTML(captionText) : '<span class="none">This post has no caption.</span>';
+    $("#copyCap").disabled = !captionText;
+    const tags = hashtags(captionText);
+    $("#tags").innerHTML = tags.map((t, i) => `<button type="button" data-copy="${esc(t)}" style="--i:${i}" title="Copy ${esc(t)}">${esc(t)}</button>`).join("")
+      + (tags.length > 1 ? `<button type="button" class="all" data-copy="${esc(tags.join(" "))}" style="--i:${tags.length}">Copy all tags</button>` : "");
+
+    // qualities
+    baseName = slug(captionText.split("#")[0] || d.title || handle);
+    qList.innerHTML = fmts.map((f, i) => `
+      <button type="button" class="q-opt" role="radio" data-i="${i}" style="--i:${i}">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="q-res">${esc(f.label)}${i === 0 ? '<span class="tag">Best</span>' : ""}</span>
+        <span class="q-meta">${esc([(f.ext || "mp4").toUpperCase(), fmtSize(f.filesize), f.note].filter(Boolean).join(" · "))}</span>
+      </button>`).join("");
+    $("#qCount").textContent = `${fmts.length} option${fmts.length === 1 ? "" : "s"}`;
+    select(0);
+
     result.classList.add("show");
+    requestAnimationFrame(() => {
+      const clamped = captionText && capEl.scrollHeight > capEl.clientHeight + 4;
+      capEl.classList.toggle("clamped", !!clamped); moreBtn.hidden = !clamped;
+    });
     const box = result.getBoundingClientRect();
-    if (box.bottom > innerHeight) {
-      if (lenis) lenis.scrollTo(result, { offset: -100, duration: 1.1 });
-      else result.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+    if (box.top > innerHeight * 0.5 || box.top < 0) {
+      if (lenis) lenis.scrollTo(result, { offset: -96, duration: 1.1 });
+      else result.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
     }
   }
 

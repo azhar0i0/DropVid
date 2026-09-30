@@ -56,12 +56,14 @@ def pick_formats(info, ydl, secret_names):
 
     out, seen = [], set()
     for f in prog:
-        h = f.get("height")
-        key = h or f.get("format_id")
+        w, h = f.get("width"), f.get("height")
+        # "720p" means the short side, so a vertical 720x1280 reel is 720p, not 1280p
+        short = min(w, h) if w and h else h
+        key = short or f.get("format_id")
         if key in seen:
             continue
         seen.add(key)
-        label = f"{h}p" if h else (f.get("format_note") or "Video").upper()
+        label = f"{short}p" if short else (f.get("format_note") or "Video").upper()
         headers = dict(f.get("http_headers") or {})
         ck = cdn_cookies(ydl, f["url"], secret_names)
         if ck:
@@ -70,6 +72,8 @@ def pick_formats(info, ydl, secret_names):
             "label": label,
             "url": f["url"],
             "ext": f.get("ext") or "mp4",
+            "width": w,
+            "height": h,
             "filesize": f.get("filesize") or f.get("filesize_approx"),
             "note": "no watermark" if "nowm" in (f.get("format_id") or "").lower() else "",
             "h": b64(headers),
@@ -124,6 +128,13 @@ class handler(BaseHTTPRequestHandler):
             "platform": platform,
             "title": info.get("title") or (info.get("description") or "")[:90] or "Untitled video",
             "uploader": info.get("uploader") or info.get("channel") or "",
+            "uploader_id": info.get("uploader_id") or info.get("channel_id") or "",
+            "description": (info.get("description") or "")[:5000],
+            "webpage_url": info.get("webpage_url") or url,
+            "upload_date": info.get("upload_date"),
+            "view_count": info.get("view_count"),
+            "like_count": info.get("like_count"),
+            "comment_count": info.get("comment_count"),
             "thumbnail": info.get("thumbnail"),
             "duration": info.get("duration"),
             "formats": formats,
