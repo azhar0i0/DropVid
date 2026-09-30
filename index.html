@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dropvid — Instagram, Facebook & TikTok Video Downloader</title>
+<meta name="description" content="Paste a link from Instagram, Facebook or TikTok and download the video in one click.">
+<style>
+  :root{
+    --bg:#0b0d13; --bg2:#10131b; --card:rgba(255,255,255,.035); --line:rgba(255,255,255,.08);
+    --text:#eef0f6; --muted:#8e94a6; --accent:#7c8cff; --accent2:#c084fc; --ok:#34d399; --err:#fb7185;
+    --r:16px; --shadow:0 30px 80px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:radial-gradient(1200px 600px at 50% -10%, #1b2040 0%, var(--bg) 55%);
+    color:var(--text); font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  .wrap{max-width:820px; margin:0 auto; padding:56px 20px 80px}
+  header{display:flex; align-items:center; justify-content:space-between; margin-bottom:56px}
+  .logo{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:-.01em}
+  .logo i{width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:grid; place-items:center}
+  .logo i::after{content:""; width:0; height:0; border-left:10px solid #fff; border-top:6px solid transparent; border-bottom:6px solid transparent; margin-left:3px}
+  header nav{display:flex; gap:18px; color:var(--muted); font-size:.92rem}
+  header nav a{text-decoration:none} header nav a:hover{color:var(--text)}
+
+  .hero h1{font-size:clamp(1.9rem,5vw,2.9rem); line-height:1.12; letter-spacing:-.03em; margin:0 0 12px; text-align:center}
+  .hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .hero p{text-align:center; color:var(--muted); margin:0 auto 32px; max-width:520px}
+  .chips{display:flex; justify-content:center; gap:8px; margin-bottom:28px; flex-wrap:wrap}
+  .chip{font-size:.8rem; padding:6px 12px; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:var(--card); transition:.2s}
+  .chip.active{color:#fff; border-color:transparent}
+  .chip[data-p=instagram].active{background:linear-gradient(90deg,#f0589a,#f5a623)}
+  .chip[data-p=facebook].active{background:#1877f2}
+  .chip[data-p=tiktok].active{background:#111; box-shadow:0 0 0 1px #25f4ee inset, 2px 2px 0 #fe2c55}
+
+  .box{
+    display:flex; gap:8px; padding:8px; border-radius:calc(var(--r) + 4px); background:var(--bg2);
+    border:1px solid var(--line); box-shadow:var(--shadow); position:relative;
+  }
+  .box:focus-within{border-color:rgba(124,140,255,.6); box-shadow:var(--shadow),0 0 0 4px rgba(124,140,255,.15)}
+  .box input{
+    flex:1; min-width:0; background:transparent; border:0; outline:0; color:var(--text); font-size:1.02rem; padding:12px 14px;
+  }
+  .box input::placeholder{color:#5b6172}
+  .btn{
+    border:0; cursor:pointer; border-radius:12px; font-weight:600; font-size:.95rem; padding:0 18px; height:46px;
+    display:inline-flex; align-items:center; gap:8px; transition:.18s; white-space:nowrap; text-decoration:none;
+  }
+  .btn:disabled{opacity:.5; cursor:not-allowed}
+  .btn.ghost{background:transparent; color:var(--muted); border:1px solid var(--line)}
+  .btn.ghost:hover:not(:disabled){color:var(--text); background:rgba(255,255,255,.04)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 8px 24px rgba(124,140,255,.35)}
+  .btn.primary:hover:not(:disabled){transform:translateY(-1px); filter:brightness(1.08)}
+  .btn .spin{width:16px; height:16px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; display:none}
+  .btn.loading .spin{display:inline-block} .btn.loading .lbl{display:none}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .msg{margin:14px 4px 0; font-size:.92rem; color:var(--muted); min-height:1.4em; display:flex; align-items:center; gap:8px}
+  .msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
+
+  .result{
+    margin-top:28px; border:1px solid var(--line); border-radius:var(--r); background:var(--card); overflow:hidden;
+    opacity:0; transform:translateY(10px); transition:.35s; display:none;
+  }
+  .result.show{display:block; opacity:1; transform:none}
+  .result .top{display:flex; gap:18px; padding:20px}
+  .thumb{width:150px; aspect-ratio:1/1; border-radius:12px; object-fit:cover; background:#1a1d28; flex:none}
+  .meta{flex:1; min-width:0}
+  .meta .plat{font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:700}
+  .meta h2{margin:6px 0 6px; font-size:1.08rem; line-height:1.35; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .meta .by{color:var(--muted); font-size:.9rem}
+  .formats{border-top:1px solid var(--line)}
+  .fmt{display:flex; align-items:center; gap:14px; padding:14px 20px; border-bottom:1px solid var(--line)}
+  .fmt:last-child{border-bottom:0}
+  .fmt .q{font-weight:600; min-width:70px}
+  .fmt .d{color:var(--muted); font-size:.88rem; flex:1}
+  .fmt .tag{font-size:.7rem; padding:2px 8px; border-radius:999px; background:rgba(52,211,153,.12); color:var(--ok); margin-left:8px}
+  .fmt .btn{height:38px; padding:0 14px; font-size:.88rem}
+  .foot{padding:12px 20px; font-size:.82rem; color:var(--muted); background:rgba(0,0,0,.2); display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
+  .foot a{color:var(--accent); text-decoration:none}
+
+  .how{margin-top:64px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .how div{padding:18px; border:1px solid var(--line); border-radius:14px; background:var(--card)}
+  .how b{display:block; margin-bottom:4px} .how p{margin:0; color:var(--muted); font-size:.9rem}
+  .how em{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:8px; background:rgba(124,140,255,.15); color:var(--accent); font-style:normal; font-weight:700; font-size:.85rem; margin-bottom:10px}
+  footer{margin-top:56px; text-align:center; color:#5b6172; font-size:.82rem; line-height:1.7}
+
+  @media (max-width:600px){
+    .wrap{padding-top:32px} header{margin-bottom:36px} header nav{display:none}
+    .box{flex-wrap:wrap} .box input{width:100%; flex:1 0 100%} .box .btn{flex:1}
+    .result .top{flex-direction:column} .thumb{width:100%; aspect-ratio:16/9}
+    .how{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><i></i> Dropvid</div>
+    <nav><a href="#how">How it works</a><a href="#faq">FAQ</a></nav>
+  </header>
+
+  <section class="hero">
+    <h1>Download videos from <span>Instagram, Facebook & TikTok</span></h1>
+    <p>Paste a link, pick a quality, save the MP4. No app, no sign-up, no watermark on the file we serve.</p>
+    <div class="chips">
+      <span class="chip" data-p="instagram">Instagram</span>
+      <span class="chip" data-p="facebook">Facebook</span>
+      <span class="chip" data-p="tiktok">TikTok</span>
+    </div>
+
+    <form class="box" id="form" autocomplete="off">
+      <input id="url" type="url" placeholder="Paste a video link here…" spellcheck="false" required>
+      <button type="button" class="btn ghost" id="paste" title="Paste from clipboard">Paste</button>
+      <button type="submit" class="btn primary" id="go"><span class="spin"></span><span class="lbl">Fetch video</span></button>
+    </form>
+    <div class="msg" id="msg"></div>
+
+    <div class="result" id="result">
+      <div class="top">
+        <img class="thumb" id="thumb" alt="">
+        <div class="meta">
+          <div class="plat" id="plat"></div>
+          <h2 id="title"></h2>
+          <div class="by" id="by"></div>
+        </div>
+      </div>
+      <div class="formats" id="formats"></div>
+      <div class="foot">
+        <span>Download not starting? <a id="direct" href="#" target="_blank" rel="noopener">Open the video directly</a> and save it from there.</span>
+        <span id="expiry">Links expire after a while — fetch again if needed.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div><em>1</em><b>Copy the link</b><p>Tap Share → Copy link on the post, reel, or video you want.</p></div>
+    <div><em>2</em><b>Paste it above</b><p>We detect the platform and fetch the available qualities.</p></div>
+    <div><em>3</em><b>Download</b><p>Choose HD or SD and the MP4 saves straight to your device.</p></div>
+  </section>
+
+  <footer id="faq">
+    Works with public posts, reels, stories from public accounts, and TikTok videos.<br>
+    Only download content you own or have permission to save. Dropvid is not affiliated with Meta or ByteDance.
+  </footer>
+</div>
+
+<script>
+(() => {
+  const API = "/api";
+  const $ = s => document.querySelector(s);
+  const urlEl = $("#url"), go = $("#go"), msg = $("#msg"), result = $("#result");
+  const PLATFORMS = {
+    instagram: /^https?:\/\/(www\.)?instagram\.com\//i,
+    facebook:  /^https?:\/\/(www\.|m\.|web\.|fb\.)?(facebook\.com|fb\.watch)\//i,
+    tiktok:    /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i,
+  };
+  const detect = u => Object.keys(PLATFORMS).find(k => PLATFORMS[k].test(u)) || null;
+
+  function setMsg(text, cls = "") { msg.textContent = text; msg.className = "msg " + cls; }
+  function highlight(p) { document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.p === p)); }
+  function fmtSize(b) { if (!b) return ""; const u = ["B","KB","MB","GB"]; let i = 0; while (b >= 1024 && i < 3) { b /= 1024; i++; } return b.toFixed(i ? 1 : 0) + " " + u[i]; }
+  function fmtDur(s) { if (!s) return ""; s = Math.round(s); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
+  function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]); }
+  function slug(t) { return (t || "video").toLowerCase().replace(/[^\w]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50) || "video"; }
+  function proxy(u, name, h, inline) {
+    const q = new URLSearchParams({ u });
+    if (name) q.set("n", name); if (h) q.set("h", h); if (inline) q.set("inline", "1");
+    return `${API}/download?${q}`;
+  }
+
+  urlEl.addEventListener("input", () => highlight(detect(urlEl.value.trim())));
+
+  $("#paste").addEventListener("click", async () => {
+    try { urlEl.value = (await navigator.clipboard.readText()).trim(); urlEl.dispatchEvent(new Event("input")); urlEl.focus(); }
+    catch { setMsg("Clipboard access was blocked — paste manually with Ctrl/Cmd+V.", "err"); }
+  });
+
+  $("#form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const url = urlEl.value.trim();
+    const platform = detect(url);
+    if (!platform) return setMsg("That doesn't look like an Instagram, Facebook or TikTok link.", "err");
+
+    result.classList.remove("show");
+    go.disabled = true; go.classList.add("loading");
+    setMsg("Fetching video details…");
+
+    try {
+      const r = await fetch(`${API}/resolve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+      const data = await r.json().catch(() => ({ error: "Server returned an unexpected response." }));
+      if (!r.ok) throw new Error(data.error || "Couldn't fetch this video.");
+      render(data, platform);
+      setMsg("Ready — choose a quality below.", "ok");
+    } catch (err) {
+      setMsg(err.message, "err");
+    } finally {
+      go.disabled = false; go.classList.remove("loading");
+    }
+  });
+
+  function render(d, platform) {
+    $("#plat").textContent = d.platform || platform;
+    $("#title").textContent = d.title || "Untitled video";
+    const bits = [];
+    if (d.uploader) bits.push(d.uploader);
+    if (d.duration) bits.push(fmtDur(d.duration));
+    $("#by").textContent = bits.join(" · ");
+
+    const thumb = $("#thumb");
+    if (d.thumbnail) { thumb.src = proxy(d.thumbnail, "", "", true); thumb.style.display = ""; }
+    else thumb.style.display = "none";
+
+    const base = slug(d.title);
+    const list = $("#formats"); list.innerHTML = "";
+    (d.formats || []).forEach((f, i) => {
+      const row = document.createElement("div"); row.className = "fmt";
+      row.innerHTML = `
+        <div class="q">${esc(f.label)}</div>
+        <div class="d">${esc([f.ext?.toUpperCase(), fmtSize(f.filesize), f.note].filter(Boolean).join(" · "))}${i === 0 ? '<span class="tag">Best</span>' : ""}</div>
+        <a class="btn primary" download href="${esc(proxy(f.url, `${base}-${f.label.toLowerCase()}.${f.ext || "mp4"}`, f.h))}">Download</a>`;
+      list.appendChild(row);
+    });
+    $("#direct").href = d.formats?.[0]?.url || "#";
+    result.classList.add("show");
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  // Support ?url= deep links, e.g. from a browser bookmarklet
+  const pre = new URLSearchParams(location.search).get("url");
+  if (pre) { urlEl.value = pre; urlEl.dispatchEvent(new Event("input")); $("#form").requestSubmit(); }
+})();
+</script>
+</body>
+</html>
