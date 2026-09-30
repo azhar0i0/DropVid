@@ -4,256 +4,1007 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dropvid — Instagram, Facebook & TikTok video downloader</title>
-<meta name="description" content="Paste a link from Instagram, Facebook or TikTok, pick a quality and save the MP4. No app, no sign-up.">
+<meta name="description" content="Paste a link from Instagram, Facebook or TikTok, pick a quality and save the MP4. Free, no app, no sign-up.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Dropvid — save videos from Instagram, Facebook & TikTok">
-<meta property="og:description" content="Paste a link, pick a quality, save the MP4. No app, no sign-up.">
-<meta name="theme-color" content="#0e0d0b">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e0a44a'/%3E%3Cpath d='M16 8v11m0 0-5-5m5 5 5-5M10 24h12' stroke='%231a1307' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta property="og:description" content="Paste a link, pick a quality, save the MP4. Free, no app, no sign-up.">
+<meta name="theme-color" content="#f7f4ee">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317150f'/%3E%3Cpath d='M16 8v11m0 0-5-5m5 5 5-5M10 24h12' stroke='%23e8a33a' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
 <style>
   :root{
-    --bg:#0e0d0b; --raise:#161512; --surface:#1c1a17; --surface-2:#23211d;
-    --line:rgba(236,228,214,.08); --line-strong:rgba(236,228,214,.16);
-    --text:#ece6da; --muted:#9a9387; --faint:#6b665d;
-    --accent:#e0a44a; --accent-soft:rgba(224,164,74,.14); --accent-ink:#1a1307;
-    --ok:#9cc59a; --err:#e38b7b;
-    --shadow:0 24px 60px -20px rgba(8,6,2,.7), 0 2px 6px rgba(8,6,2,.35);
+    --bg:#f7f4ee; --bg-2:#efe9de; --surface:#fffdf9; --white:#ffffff;
+    --ink:#17150f; --ink-2:#3a362d; --muted:#6c665a; --faint:#a19a8b;
+    --line:#e6dfd2; --line-2:#d6cebe;
+    --accent:#e8a33a; --accent-deep:#95560b; --accent-wash:#fbefd9; --accent-wash-2:#f6e2bd;
+    --ok:#2f7a4a; --ok-wash:#e5f2e8; --err:#b0402d; --err-wash:#fbe9e5;
+    --ig:#e1306c; --fb:#0866ff; --tt:#111111;
+    --r-sm:10px; --r:16px; --r-lg:24px; --r-xl:32px;
+    --shadow-sm:0 1px 2px rgba(60,44,20,.06), 0 2px 8px -2px rgba(60,44,20,.08);
+    --shadow:0 2px 4px rgba(60,44,20,.04), 0 18px 40px -18px rgba(60,44,20,.22);
+    --shadow-lg:0 4px 10px rgba(60,44,20,.05), 0 40px 80px -30px rgba(60,44,20,.32);
     --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
     --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
     --ease:cubic-bezier(.2,.8,.2,1);
+    --z-header:20; --z-skip:30;
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    margin:0; min-height:100dvh; color:var(--text); font:16px/1.6 var(--sans);
-    background:
-      radial-gradient(900px 520px at 12% -8%, rgba(224,164,74,.10), transparent 60%),
-      radial-gradient(700px 500px at 100% 30%, rgba(236,228,214,.035), transparent 65%),
-      var(--bg);
-    -webkit-font-smoothing:antialiased;
-  }
-  /* grain */
+  html{scroll-behavior:smooth; scroll-padding-top:88px}
+  body{margin:0; min-height:100dvh; background:var(--bg); color:var(--ink); font:16px/1.6 var(--sans); -webkit-font-smoothing:antialiased; overflow-x:hidden}
   body::before{
-    content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.06; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.35; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .28 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   a{color:inherit}
-  :focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:6px}
-  .skip{position:absolute; left:16px; top:-60px; z-index:3; background:var(--accent); color:var(--accent-ink); padding:10px 14px; border-radius:8px; font-weight:600; text-decoration:none}
-  .skip:focus{top:16px}
+  img,svg{display:block}
+  :focus-visible{outline:2px solid var(--ink); outline-offset:3px; border-radius:8px}
   .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+  .skip{position:absolute; left:16px; top:-60px; z-index:var(--z-skip); background:var(--ink); color:var(--white); padding:10px 14px; border-radius:10px; font-weight:600; text-decoration:none}
+  .skip:focus{top:12px}
+  .i{width:1.15em; height:1.15em; flex:none; fill:currentColor}
+  .container{position:relative; z-index:1; width:100%; max-width:1200px; margin:0 auto; padding:0 32px}
 
-  .wrap{position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:28px 24px 96px}
-  header{display:flex; align-items:center; justify-content:space-between; margin-bottom:clamp(56px,10vw,112px)}
-  .logo{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.02em; font-size:1.05rem; text-decoration:none}
-  .logo svg{width:28px; height:28px; flex:none}
-  header nav{display:flex; gap:4px; font-size:.9rem}
-  header nav a{text-decoration:none; color:var(--muted); padding:6px 12px; border-radius:8px; transition:color .2s, background .2s}
-  header nav a:hover{color:var(--text); background:var(--surface)}
+  /* ---------- header ---------- */
+  .site-header{position:sticky; top:0; z-index:var(--z-header); transition:background .3s, box-shadow .3s, border-color .3s; border-bottom:1px solid transparent}
+  .site-header.scrolled{background:rgba(247,244,238,.82); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-color:var(--line)}
+  .bar{display:flex; align-items:center; justify-content:space-between; gap:24px; height:72px}
+  .logo{display:flex; align-items:center; gap:10px; font-weight:600; font-size:1.12rem; letter-spacing:-.02em; text-decoration:none}
+  .logo-mark{width:32px; height:32px; border-radius:9px; background:var(--ink); display:grid; place-items:center; color:var(--accent); box-shadow:inset 0 -2px 0 rgba(255,255,255,.08)}
+  .logo-mark .i{width:18px; height:18px}
+  .nav{display:flex; align-items:center; gap:2px}
+  .nav a{text-decoration:none; font-size:.93rem; color:var(--muted); padding:8px 14px; border-radius:999px; transition:color .2s, background .2s}
+  .nav a:hover{color:var(--ink); background:rgba(23,21,15,.05)}
+  .nav a.current{color:var(--ink); background:var(--white); box-shadow:var(--shadow-sm)}
+  .bar-cta{display:flex; align-items:center; gap:10px}
+  .menu-btn{display:none; width:44px; height:44px; border-radius:12px; border:1px solid var(--line-2); background:var(--white); cursor:pointer; place-content:center; gap:5px}
+  .menu-btn span{display:block; width:18px; height:1.6px; background:var(--ink); border-radius:2px; transition:transform .25s var(--ease), opacity .2s}
+  .menu-btn[aria-expanded="true"] span:first-child{transform:translateY(3.3px) rotate(45deg)}
+  .menu-btn[aria-expanded="true"] span:last-child{transform:translateY(-3.3px) rotate(-45deg)}
 
-  /* hero */
-  .hero{max-width:760px}
-  .eyebrow{font:500 .78rem/1 var(--mono); color:var(--accent); letter-spacing:.04em; margin:0 0 22px; display:flex; align-items:center; gap:10px}
-  .eyebrow::before{content:""; width:22px; height:1px; background:var(--accent)}
-  .hero h1{font-size:clamp(2.6rem,7.4vw,4.9rem); line-height:.98; letter-spacing:-.045em; font-weight:700; margin:0 0 22px; text-wrap:balance}
-  .hero h1 em{font-style:normal; color:var(--muted); font-weight:500}
-  .lede{color:var(--muted); font-size:1.08rem; max-width:52ch; margin:0 0 40px; text-wrap:pretty}
-
-  .box{
-    display:flex; gap:6px; padding:7px; border-radius:18px; background:var(--raise);
-    border:1px solid var(--line-strong); box-shadow:var(--shadow), inset 0 1px 0 rgba(236,228,214,.04);
-    transition:border-color .25s var(--ease), box-shadow .25s var(--ease);
-  }
-  .box:focus-within{border-color:rgba(224,164,74,.55); box-shadow:var(--shadow), 0 0 0 4px var(--accent-soft)}
-  .box input{flex:1; min-width:0; background:transparent; border:0; outline:0; color:var(--text); font:400 1.02rem var(--sans); padding:12px 14px}
-  .box input::placeholder{color:var(--faint)}
+  /* ---------- buttons ---------- */
   .btn{
-    border:0; cursor:pointer; border-radius:12px; font:600 .94rem var(--sans); padding:0 20px; height:48px;
+    border:0; cursor:pointer; border-radius:12px; font:600 .95rem var(--sans); padding:0 20px; height:48px;
     display:inline-flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; text-decoration:none;
     transition:transform .18s var(--ease), background .2s, color .2s, box-shadow .2s, border-color .2s;
   }
   .btn:active:not(:disabled){transform:scale(.97)}
   .btn:disabled{opacity:.55; cursor:not-allowed}
-  .btn.text{background:transparent; color:var(--muted); padding:0 14px}
-  .btn.text:hover:not(:disabled){color:var(--text); background:var(--surface)}
-  .btn.primary{background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 22px -8px rgba(224,164,74,.55)}
-  .btn.primary:hover:not(:disabled){background:#e8b35e; transform:translateY(-1px)}
-  .btn.primary:active:not(:disabled){transform:translateY(0) scale(.97)}
-  .btn.quiet{background:var(--surface-2); color:var(--text); border:1px solid var(--line)}
-  .btn.quiet:hover{border-color:rgba(224,164,74,.5); color:var(--accent)}
-  .btn .spin{width:16px; height:16px; border:2px solid rgba(26,19,7,.3); border-top-color:var(--accent-ink); border-radius:50%; animation:sp .7s linear infinite; display:none}
+  .btn.dark{background:var(--ink); color:var(--white); box-shadow:0 10px 24px -10px rgba(23,21,15,.55)}
+  .btn.dark:hover:not(:disabled){background:#2a261d; transform:translateY(-1px)}
+  .btn.dark:active:not(:disabled){transform:translateY(0) scale(.97)}
+  .btn.amber{background:var(--accent); color:var(--ink); box-shadow:0 10px 24px -10px rgba(200,130,30,.7), inset 0 -2px 0 rgba(0,0,0,.08)}
+  .btn.amber:hover:not(:disabled){background:#efb04d; transform:translateY(-1px)}
+  .btn.line{background:var(--white); color:var(--ink); border:1px solid var(--line-2)}
+  .btn.line:hover{border-color:var(--ink)}
+  .btn.ghost{background:transparent; color:var(--muted); padding:0 14px}
+  .btn.ghost:hover:not(:disabled){color:var(--ink); background:rgba(23,21,15,.05)}
+  .btn.sm{height:40px; padding:0 16px; font-size:.88rem; border-radius:10px}
+  .btn .spin{width:16px; height:16px; border:2px solid rgba(255,255,255,.3); border-top-color:var(--white); border-radius:50%; animation:sp .7s linear infinite; display:none}
   .btn.loading .spin{display:inline-block} .btn.loading .lbl{display:none}
   @keyframes sp{to{transform:rotate(360deg)}}
 
-  .below{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:16px 4px 0}
-  .chips{display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:.84rem; color:var(--faint)}
-  .chip{display:inline-flex; align-items:center; gap:7px; padding:5px 10px; border-radius:7px; color:var(--muted); transition:color .2s, background .2s}
-  .chip::before{content:""; width:6px; height:6px; border-radius:2px; background:var(--line-strong); transition:background .2s}
-  .chip.active{color:var(--text); background:var(--surface)}
-  .chip.active::before{background:var(--accent)}
-  .msg{font-size:.9rem; color:var(--muted); min-height:1.5em; margin:0}
-  .msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
+  /* ---------- hero ---------- */
+  .hero{padding:56px 0 40px}
+  .hero-grid{display:grid; grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr); gap:48px; align-items:center}
+  .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 12px 6px 8px; border-radius:999px; background:var(--white); border:1px solid var(--line); font-size:.82rem; color:var(--ink-2); box-shadow:var(--shadow-sm); margin-bottom:26px}
+  .pill b{display:inline-flex; align-items:center; gap:5px; background:var(--accent-wash); color:var(--accent-deep); font-weight:600; padding:2px 8px; border-radius:999px; font-size:.76rem}
+  .pill b .i{width:12px; height:12px}
+  h1{font-size:clamp(2.6rem,6.2vw,4.6rem); line-height:1; letter-spacing:-.045em; font-weight:700; margin:0 0 22px; text-wrap:balance}
+  .serif{font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.02em; color:var(--accent-deep)}
+  .lede{color:var(--muted); font-size:1.12rem; max-width:50ch; margin:0 0 34px; text-wrap:pretty}
 
-  /* result + skeleton */
-  .result,.skel{margin-top:36px; border-radius:20px; background:var(--surface); border:1px solid var(--line); overflow:hidden; box-shadow:var(--shadow); display:none}
+  .box{
+    display:flex; gap:6px; padding:7px; border-radius:18px; background:var(--white);
+    border:1px solid var(--line-2); box-shadow:var(--shadow);
+    transition:border-color .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .box:focus-within{border-color:var(--ink); box-shadow:var(--shadow), 0 0 0 4px rgba(232,163,58,.25)}
+  .box .field{flex:1; min-width:0; display:flex; align-items:center; gap:10px; padding-left:14px; color:var(--faint)}
+  .box input{flex:1; min-width:0; background:transparent; border:0; outline:0; color:var(--ink); font:400 1.02rem var(--sans); padding:12px 4px}
+  .box input::placeholder{color:var(--faint)}
+  .below{display:flex; align-items:center; justify-content:space-between; gap:12px 20px; flex-wrap:wrap; margin:14px 2px 0}
+  .chips{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  .chip{display:inline-flex; align-items:center; gap:7px; padding:6px 11px 6px 8px; border-radius:999px; font-size:.84rem; color:var(--muted); border:1px solid transparent; transition:all .25s var(--ease)}
+  .chip svg{width:16px; height:16px; fill:var(--faint); transition:fill .25s}
+  .chip.active{background:var(--white); border-color:var(--line); color:var(--ink); box-shadow:var(--shadow-sm)}
+  .chip.active[data-p=instagram] svg{fill:url(#g-ig)} .chip.active[data-p=facebook] svg{fill:var(--fb)} .chip.active[data-p=tiktok] svg{fill:var(--tt)}
+  .msg{font-size:.9rem; color:var(--muted); margin:0; display:inline-flex; align-items:center; gap:8px}
+  .msg:empty{display:none}
+  .msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
+  .trust{display:flex; flex-wrap:wrap; gap:8px 22px; margin:30px 0 0; padding:0; list-style:none; font-size:.88rem; color:var(--ink-2)}
+  .trust li{display:flex; align-items:center; gap:7px}
+  .trust .i{color:var(--ok); width:16px; height:16px}
+
+  .art{position:relative}
+  .art svg{width:100%; height:auto; overflow:visible}
+  .art .shadow{filter:drop-shadow(0 18px 28px rgba(60,44,20,.18)) drop-shadow(0 2px 4px rgba(60,44,20,.08))}
+  .float-a{animation:floatY 6s ease-in-out infinite}
+  .float-b{animation:floatY 7s ease-in-out infinite reverse}
+  .float-c{animation:floatY 5.5s ease-in-out infinite; animation-delay:-2s}
+  @keyframes floatY{50%{transform:translateY(-8px)}}
+  .prog{transform-box:fill-box; transform-origin:left center; animation:prog 3.6s var(--ease) infinite}
+  @keyframes prog{0%{transform:scaleX(.05)} 70%,100%{transform:scaleX(1)}}
+  .dash{stroke-dasharray:5 7; animation:dash 1.4s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-24}}
+
+  /* ---------- result ---------- */
+  .result-wrap{max-width:880px; margin:8px auto 0}
+  .result,.skel{border-radius:var(--r-lg); background:var(--white); border:1px solid var(--line); overflow:hidden; box-shadow:var(--shadow-lg); display:none}
   .result.show,.skel.show{display:block; animation:rise .45s var(--ease) both}
   @keyframes rise{from{opacity:0; transform:translateY(12px)}}
-  .top{display:grid; grid-template-columns:168px 1fr; gap:22px; padding:22px}
-  .thumb{width:100%; aspect-ratio:4/5; border-radius:12px; object-fit:cover; background:var(--surface-2); display:block}
+  .top{display:grid; grid-template-columns:176px 1fr; gap:24px; padding:24px}
+  .thumb{width:100%; aspect-ratio:4/5; border-radius:14px; object-fit:cover; background:var(--bg-2)}
   .meta{min-width:0; padding-top:4px}
-  .plat{font:500 .76rem var(--mono); color:var(--accent)}
-  .meta h2{margin:8px 0 10px; font-size:1.2rem; line-height:1.3; letter-spacing:-.02em; font-weight:600; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
-  .by{color:var(--muted); font-size:.9rem; font-variant-numeric:tabular-nums}
+  .plat{display:inline-flex; align-items:center; gap:7px; font:500 .8rem var(--mono); color:var(--ink-2); background:var(--bg); border:1px solid var(--line); padding:4px 10px 4px 7px; border-radius:999px}
+  .plat svg{width:15px; height:15px}
+  .plat[data-p=instagram] svg{fill:url(#g-ig)} .plat[data-p=facebook] svg{fill:var(--fb)} .plat[data-p=tiktok] svg{fill:var(--tt)}
+  .meta h2{margin:12px 0 10px; font-size:1.3rem; line-height:1.3; letter-spacing:-.02em; font-weight:600; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .by{color:var(--muted); font-size:.92rem; font-variant-numeric:tabular-nums}
   .formats{border-top:1px solid var(--line)}
-  .fmt{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:18px; padding:14px 22px; border-bottom:1px solid var(--line); transition:background .2s}
-  .fmt:hover{background:rgba(236,228,214,.02)}
+  .fmt{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:18px; padding:14px 24px; border-bottom:1px solid var(--line); transition:background .2s}
+  .fmt:hover{background:var(--surface)}
   .fmt:last-child{border-bottom:0}
-  .q{font:500 .98rem var(--mono); min-width:72px; font-variant-numeric:tabular-nums}
-  .d{color:var(--muted); font-size:.86rem; font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-  .tag{font:500 .68rem var(--mono); padding:3px 6px; border-radius:4px; background:var(--accent-soft); color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
-  .fmt .btn{height:40px; padding:0 16px; font-size:.88rem; border-radius:10px}
-  .foot{padding:14px 22px 16px; font-size:.84rem; color:var(--muted); background:var(--raise); display:flex; justify-content:space-between; gap:10px 24px; flex-wrap:wrap; border-top:1px solid var(--line)}
-  .foot a{color:var(--accent); text-underline-offset:3px}
-  .skel .top{align-items:start}
-  .sk{background:linear-gradient(90deg,var(--surface-2) 0%,#2b2924 45%,var(--surface-2) 90%); background-size:220% 100%; animation:shim 1.3s linear infinite; border-radius:8px}
-  .sk.thumb{border-radius:12px}
+  .q{font:500 1rem var(--mono); min-width:72px; font-variant-numeric:tabular-nums}
+  .d{color:var(--muted); font-size:.87rem; font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .tag{font:500 .68rem var(--mono); padding:3px 7px; border-radius:5px; background:var(--accent-wash); color:var(--accent-deep); text-transform:uppercase; letter-spacing:.06em}
+  .foot{padding:14px 24px 16px; font-size:.85rem; color:var(--muted); background:var(--surface); display:flex; justify-content:space-between; gap:8px 24px; flex-wrap:wrap; border-top:1px solid var(--line)}
+  .foot a{color:var(--ink); font-weight:500; text-underline-offset:3px}
+  .sk{background:linear-gradient(90deg,var(--bg-2) 0%,#f7f2e8 45%,var(--bg-2) 90%); background-size:220% 100%; animation:shim 1.3s linear infinite; border-radius:8px}
   .sk.line{height:14px; margin:10px 0}
-  .skel .fmt{padding:16px 22px}
+  .skel .fmt{padding:16px 24px}
   @keyframes shim{from{background-position:120% 0} to{background-position:-120% 0}}
 
-  /* sections */
-  section.block{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.9fr); gap:40px 64px; margin-top:clamp(96px,14vw,160px); padding-top:40px; border-top:1px solid var(--line)}
-  .block h2{font-size:clamp(1.6rem,3vw,2.1rem); line-height:1.08; letter-spacing:-.035em; font-weight:600; margin:0; text-wrap:balance}
-  .block .side p{color:var(--muted); margin:14px 0 0; max-width:30ch}
-  .steps{list-style:none; margin:0; padding:0; counter-reset:s}
-  .steps li{counter-increment:s; display:grid; grid-template-columns:56px 1fr; gap:4px 12px; padding:22px 0 24px; border-bottom:1px solid var(--line)}
-  .steps li:first-child{padding-top:4px}
-  .steps li::before{content:"0" counter(s); font:500 .86rem var(--mono); color:var(--accent); grid-row:span 2; padding-top:3px}
-  .steps b{font-weight:600; font-size:1.06rem; letter-spacing:-.01em}
-  .steps p{margin:0; color:var(--muted); max-width:58ch}
-  .faq{margin:0}
-  .faq div{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr); gap:8px 32px; padding:20px 0 22px; border-bottom:1px solid var(--line)}
-  .faq div:first-child{padding-top:4px}
-  .faq dt{font-weight:500; letter-spacing:-.01em}
-  .faq dd{margin:0; color:var(--muted); text-wrap:pretty}
+  /* ---------- sections ---------- */
+  section.sec{padding:clamp(80px,11vw,136px) 0 0}
+  .kicker{display:inline-flex; align-items:center; gap:8px; font:500 .8rem var(--mono); color:var(--accent-deep); margin:0 0 16px}
+  .kicker::before{content:""; width:18px; height:1.5px; background:currentColor}
+  h2.title{font-size:clamp(2rem,4.2vw,3.1rem); line-height:1.04; letter-spacing:-.04em; font-weight:600; margin:0; text-wrap:balance; max-width:18ch}
+  .sec-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px 48px; flex-wrap:wrap; margin-bottom:48px}
+  .sec-head p{color:var(--muted); max-width:42ch; margin:0; text-wrap:pretty}
 
-  footer{margin-top:96px; padding-top:28px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:16px 40px; flex-wrap:wrap; color:var(--faint); font-size:.84rem; line-height:1.7}
-  footer p{margin:0; max-width:60ch}
-  footer nav{display:flex; gap:20px}
-  footer nav a{text-decoration:none; color:var(--muted)} footer nav a:hover{color:var(--text)}
+  /* platforms */
+  .plats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px}
+  .plat-card{position:relative; background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; overflow:hidden; transition:transform .3s var(--ease), box-shadow .3s var(--ease)}
+  .plat-card:hover{--ty:-4px; box-shadow:var(--shadow)}
+  .plat-card::after{content:""; position:absolute; right:-60px; top:-60px; width:180px; height:180px; border-radius:50%; background:var(--glow); opacity:.09; transition:opacity .3s}
+  .plat-card:hover::after{opacity:.16}
+  .plat-card[data-p=instagram]{--glow:#e1306c} .plat-card[data-p=facebook]{--glow:#0866ff} .plat-card[data-p=tiktok]{--glow:#25f4ee}
+  .plat-logo{width:52px; height:52px; border-radius:14px; display:grid; place-items:center; margin-bottom:22px}
+  .plat-logo svg{width:26px; height:26px; fill:#fff}
+  .plat-card[data-p=instagram] .plat-logo{background:linear-gradient(45deg,#feda75 0%,#fa7e1e 25%,#d62976 55%,#962fbf 80%,#4f5bd5 100%)}
+  .plat-card[data-p=facebook] .plat-logo{background:#0866ff}
+  .plat-card[data-p=tiktok] .plat-logo{background:#111; box-shadow:-2px -2px 0 #25f4ee inset, 2px 2px 0 #fe2c55 inset}
+  .plat-card h3{margin:0 0 6px; font-size:1.22rem; letter-spacing:-.02em; font-weight:600}
+  .plat-card > p{margin:0 0 20px; color:var(--muted); font-size:.93rem}
+  .checks{list-style:none; margin:0 0 22px; padding:0; display:grid; gap:9px}
+  .checks li{display:flex; gap:9px; font-size:.93rem; color:var(--ink-2)}
+  .checks .i{color:var(--ok); width:17px; height:17px; margin-top:3px}
+  .eg{display:block; font:400 .78rem var(--mono); color:var(--muted); background:var(--bg); border:1px dashed var(--line-2); border-radius:10px; padding:9px 12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 
-  @media (max-width:720px){
-    .wrap{padding:20px 16px 72px}
-    header nav a:first-child{display:none}
-    .box{flex-wrap:wrap} .box input{flex:1 0 100%} .box .btn.primary{flex:1}
-    .top{grid-template-columns:1fr} .thumb{aspect-ratio:16/10}
+  /* steps */
+  .steps{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; list-style:none; margin:0; padding:0; counter-reset:s; position:relative}
+  .step{counter-increment:s; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:14px 14px 26px; position:relative}
+  .step-art{background:var(--bg); border-radius:16px; border:1px solid var(--line); margin-bottom:22px; overflow:hidden}
+  .step-art svg{width:100%; height:auto}
+  .step-num{position:absolute; top:26px; left:26px; font:500 .76rem var(--mono); background:var(--ink); color:var(--white); border-radius:999px; padding:3px 9px}
+  .step-num::before{content:"0" counter(s)}
+  .step h3{margin:0 12px 6px; font-size:1.12rem; letter-spacing:-.015em; font-weight:600}
+  .step p{margin:0 12px; color:var(--muted); font-size:.93rem}
+  .step:nth-child(2){transform:translateY(28px)}
+
+  /* bento */
+  .bento{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); grid-auto-rows:minmax(180px,auto); gap:18px}
+  .tile{background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:26px; display:flex; flex-direction:column; gap:10px; position:relative; overflow:hidden; transition:box-shadow .3s var(--ease), border-color .3s}
+  .tile:hover{box-shadow:var(--shadow); border-color:var(--line-2)}
+  .tile h3{margin:0; font-size:1.1rem; letter-spacing:-.015em; font-weight:600}
+  .tile p{margin:0; color:var(--muted); font-size:.93rem; max-width:40ch}
+  .ico{width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:var(--bg); border:1px solid var(--line); color:var(--ink); margin-bottom:8px}
+  .ico .i{width:22px; height:22px}
+  .t-quality{grid-column:span 3; grid-row:span 2; background:linear-gradient(160deg,var(--white) 40%,var(--accent-wash) 140%)}
+  .t-quality .demo{margin-top:auto}
+  .t-quality svg{width:100%; height:auto}
+  .t-a{grid-column:span 3} .t-b,.t-c{grid-column:span 3}
+  .t-name{grid-column:span 2} .t-priv{grid-column:span 2} .t-fast{grid-column:span 2}
+  .t-dark{background:var(--ink); border-color:var(--ink); color:var(--white)}
+  .t-dark p{color:#b9b2a3} .t-dark .ico{background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.12); color:var(--accent)}
+  .filechip{display:inline-flex; align-items:center; gap:8px; font:400 .8rem var(--mono); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:8px 11px; margin-top:auto; align-self:flex-start; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .filechip .i{color:var(--accent-deep); width:16px; height:16px}
+
+  /* bookmarklet */
+  .panel{background:var(--accent-wash); border:1px solid var(--accent-wash-2); border-radius:var(--r-xl); padding:clamp(28px,5vw,56px); display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:40px; align-items:center; position:relative; overflow:hidden}
+  .panel::before{content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(149,86,11,.14) 1px, transparent 1.2px); background-size:18px 18px; mask-image:linear-gradient(90deg,transparent 30%,#000); -webkit-mask-image:linear-gradient(90deg,transparent 30%,#000); pointer-events:none}
+  .panel > *{position:relative}
+  .panel p{color:var(--ink-2); max-width:46ch; margin:16px 0 26px}
+  .bm{cursor:grab; background:var(--ink); color:var(--white)}
+  .bm:active{cursor:grabbing}
+  .bm-note{display:flex; align-items:center; gap:8px; font-size:.86rem; color:var(--accent-deep); margin-top:14px}
+  .panel svg.browser{width:100%; height:auto}
+
+  /* phone tips */
+  .tips{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px}
+  .tip{background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:30px}
+  .tip-head{display:flex; align-items:center; gap:14px; margin-bottom:20px}
+  .tip-head .ico{margin:0; background:var(--ink); color:var(--white); border-color:var(--ink)}
+  .tip-head h3{margin:0; font-size:1.15rem; font-weight:600; letter-spacing:-.015em}
+  .tip-head span{display:block; font-size:.85rem; color:var(--muted)}
+  .tip ol{margin:0; padding:0; list-style:none; counter-reset:t; display:grid; gap:14px}
+  .tip li{counter-increment:t; display:grid; grid-template-columns:28px 1fr; gap:12px; color:var(--ink-2); font-size:.95rem}
+  .tip li::before{content:counter(t); width:28px; height:28px; border-radius:8px; background:var(--bg); border:1px solid var(--line); display:grid; place-items:center; font:500 .8rem var(--mono); color:var(--muted)}
+  .tip b{font-weight:600; color:var(--ink)}
+
+  /* faq */
+  .faq-grid{display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr); gap:40px 72px; align-items:start}
+  .faq-side p{color:var(--muted); margin:18px 0 0; max-width:34ch}
+  .faq-side a{color:var(--ink); font-weight:500}
+  .faq{border-top:1px solid var(--line-2)}
+  .faq details{border-bottom:1px solid var(--line-2)}
+  .faq summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 4px; font-weight:500; font-size:1.05rem; letter-spacing:-.01em}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary .i{width:20px; height:20px; color:var(--muted); transition:transform .3s var(--ease)}
+  .faq details[open] summary .i{transform:rotate(180deg); color:var(--ink)}
+  .faq summary:hover{color:var(--accent-deep)}
+  .faq details p{margin:-6px 4px 24px; color:var(--muted); max-width:62ch; text-wrap:pretty}
+
+  /* cta */
+  .cta{margin-top:clamp(80px,11vw,136px); background:var(--white); border:1px solid var(--line); border-radius:var(--r-xl); padding:clamp(36px,6vw,72px); text-align:left; display:grid; grid-template-columns:minmax(0,1.3fr) auto; gap:28px; align-items:center; position:relative; overflow:hidden; box-shadow:var(--shadow)}
+  .cta h2{font-size:clamp(1.9rem,4vw,3rem); line-height:1.04; letter-spacing:-.04em; font-weight:600; margin:0; max-width:16ch}
+  .cta p{color:var(--muted); margin:14px 0 0}
+  .cta-art{position:absolute; right:-40px; bottom:-60px; width:300px; opacity:.9; pointer-events:none}
+  @media (min-width:861px){ .cta{padding-right:300px} }
+  .cta .btn{position:relative}
+
+  /* footer */
+  footer{margin-top:80px; border-top:1px solid var(--line); padding:48px 0 40px; position:relative; z-index:1}
+  .foot-grid{display:grid; grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,.6fr)); gap:32px}
+  .foot-grid p{color:var(--muted); font-size:.92rem; max-width:40ch; margin:14px 0 0}
+  .foot-grid h4{margin:4px 0 14px; font:500 .78rem var(--mono); color:var(--faint); text-transform:uppercase; letter-spacing:.08em}
+  .foot-grid ul{list-style:none; margin:0; padding:0; display:grid; gap:10px}
+  .foot-grid ul a{text-decoration:none; color:var(--ink-2); font-size:.93rem}
+  .foot-grid ul a:hover{color:var(--accent-deep)}
+  .legal{margin-top:40px; padding-top:22px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:10px 24px; flex-wrap:wrap; font-size:.84rem; color:var(--faint)}
+
+  /* reveal */
+  /* ================= MOTION ================= */
+  :root{--out:cubic-bezier(.16,1,.3,1); --spring:cubic-bezier(.34,1.56,.64,1)}
+  html.lenis,html.lenis body{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto !important}
+
+  /* scroll progress */
+  .progress{position:fixed; top:0; left:0; right:0; height:3px; z-index:calc(var(--z-header) + 1); pointer-events:none; background:linear-gradient(90deg,var(--accent),#d9822b); transform-origin:0 50%; transform:scaleX(0)}
+
+  /* scroll reveal (uses translate/scale so transform stays free for hover + tilt) */
+  .js .rv{opacity:0; translate:0 32px; scale:.985; transition:opacity .9s var(--out), translate 1.1s var(--out), scale 1.1s var(--out); transition-delay:var(--d,0s)}
+  .js .rv.in{opacity:1; translate:none; scale:none}
+
+  /* word-by-word headline reveal */
+  .w{display:inline-block; overflow:hidden; vertical-align:top; padding:0 .08em .16em 0; margin:0 -.08em -.16em 0}
+  .w > span{display:inline-block; transition:translate 1.1s var(--out); transition-delay:calc(var(--wi,0) * 60ms + var(--wd,.05s))}
+  .js .w > span{translate:0 110%}
+  .js.loaded h1 .w > span,.js .rv.in .w > span{translate:none}
+  h1 .w{--wd:.12s}
+
+  /* hero entrance */
+  .js .hero-copy > :not(h1){opacity:0; translate:0 18px}
+  .js.loaded .hero-copy > :not(h1){opacity:1; translate:none; transition:opacity 1s var(--out), translate 1s var(--out)}
+  .js.loaded .hero-copy > .pill{transition-delay:0s}
+  .js.loaded .hero-copy > .lede{transition-delay:.45s}
+  .js.loaded .hero-copy > .box{transition-delay:.58s}
+  .js.loaded .hero-copy > .below{transition-delay:.7s}
+  .js.loaded .hero-copy > .trust{transition-delay:.82s}
+  .js .art{opacity:0; scale:.94; rotate:-2deg}
+  .js.loaded .art{opacity:1; scale:none; rotate:none; transition:opacity 1.2s var(--out) .15s, scale 1.5s var(--out) .15s, rotate 1.5s var(--out) .15s}
+  .art{--mx:0; --my:0}
+  .art svg{transform:perspective(1400px) rotateY(calc(var(--mx) * 5deg)) rotateX(calc(var(--my) * -5deg)); transform-style:preserve-3d}
+  .px{translate:calc(var(--mx) * var(--dp,6) * 1px) calc(var(--my) * var(--dp,6) * 1px)}
+  .pi{transform-box:fill-box; transform-origin:center}
+  .js .pi{opacity:0; scale:.5}
+  .js.loaded .pi{opacity:1; scale:none; transition:opacity .6s var(--out) var(--pd,.6s), scale .9s var(--spring) var(--pd,.6s), translate .2s linear}
+
+  /* marquee */
+  .marquee{position:relative; z-index:1; margin-top:clamp(64px,9vw,112px); padding:22px 0; border-block:1px solid var(--line); overflow:hidden; background:rgba(255,253,249,.5);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+  .mq-track{display:flex; width:max-content; animation:mq 42s linear infinite}
+  .marquee:hover .mq-track{animation-play-state:paused}
+  .mq-group{display:flex; align-items:center; gap:34px; padding-right:34px}
+  .mq-item{display:flex; align-items:center; gap:12px; white-space:nowrap; font-size:clamp(1.25rem,2.4vw,1.85rem); letter-spacing:-.025em; font-weight:500; color:var(--ink)}
+  .mq-item.serif{color:var(--accent-deep); font-size:clamp(1.4rem,2.7vw,2.1rem)}
+  .mq-item svg{width:.95em; height:.95em}
+  .mq-sep{width:16px; height:16px; color:var(--accent); fill:currentColor; animation:spin 6s linear infinite}
+  @keyframes mq{to{transform:translateX(-50%)}}
+  @keyframes spin{to{rotate:360deg}}
+
+  /* buttons */
+  .btn .i{transition:transform .45s var(--spring)}
+  .btn:hover .i.arrow{transform:translateX(4px)}
+  .btn:hover .i.dl,.logo:hover .logo-mark .i{animation:dlBounce .7s var(--spring)}
+  @keyframes dlBounce{40%{transform:translateY(3px)} 70%{transform:translateY(-1px)}}
+  .btn.ghost:hover .i{transform:rotate(-8deg) scale(1.08)}
+  .magnetic{transition:translate .5s var(--out), transform .18s var(--ease), background .2s, box-shadow .2s}
+  .shine{position:relative; overflow:hidden; isolation:isolate}
+  .shine::after{content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.38) 50%,transparent 65%); transform:translateX(-130%); animation:shine 5s var(--out) 2s infinite}
+  @keyframes shine{0%{transform:translateX(-130%)} 28%,100%{transform:translateX(130%)}}
+  .logo-mark{transition:transform .5s var(--spring)}
+  .logo:hover .logo-mark{transform:rotate(-8deg) scale(1.06)}
+
+  /* chips + message */
+  .chip.active{animation:chipPop .55s var(--spring)}
+  .chip.active svg{animation:iconIn .7s var(--spring)}
+  @keyframes chipPop{from{scale:.88}}
+  @keyframes iconIn{from{rotate:-120deg; scale:.3}}
+  .msg{animation:msgIn .45s var(--out)}
+  @keyframes msgIn{from{opacity:0; translate:-6px 0}}
+
+  /* result */
+  .result.show .thumb{animation:thumbIn 1s var(--out) both}
+  @keyframes thumbIn{from{opacity:0; scale:1.08; filter:saturate(.4)}}
+  .result.show .meta > *{animation:rowIn .7s var(--out) both}
+  .result.show .meta > :nth-child(2){animation-delay:.08s} .result.show .meta > :nth-child(3){animation-delay:.16s}
+  .result.show .fmt{animation:rowIn .7s var(--out) both; animation-delay:calc(.2s + var(--i,0) * 80ms)}
+  @keyframes rowIn{from{opacity:0; translate:0 12px}}
+
+  /* spotlight border that follows the cursor */
+  .spot{--x:50%; --y:50%}
+  .spot::before{content:""; position:absolute; inset:0; border-radius:inherit; padding:1.5px; pointer-events:none; z-index:3;
+    background:radial-gradient(260px circle at var(--x) var(--y), rgba(232,163,58,.95), rgba(232,163,58,.18) 45%, transparent 70%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
+    opacity:0; transition:opacity .45s var(--out)}
+  .spot:hover::before{opacity:1}
+  .step,.tile,.tip,.plat-card{position:relative}
+
+  /* 3D tilt */
+  .tilt{transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px)); transition:transform .6s var(--out), box-shadow .4s var(--out)}
+  .tilt.tilting{transition:transform .12s linear, box-shadow .4s var(--out)}
+
+  /* icon micro-interactions */
+  .ico,.plat-logo{transition:transform .6s var(--spring)}
+  .tile:hover .ico{transform:translateY(-3px) rotate(-8deg) scale(1.08)}
+  .tip:hover .ico{transform:rotate(8deg) scale(1.08)}
+  .plat-card:hover .plat-logo{transform:rotate(-7deg) scale(1.1)}
+  .t-fast:hover .ico .i{animation:zap .6s steps(2) 2}
+  @keyframes zap{50%{opacity:.25}}
+  .filechip{position:relative; overflow:hidden}
+  .filechip::after{content:""; position:absolute; inset:0; background:linear-gradient(100deg,transparent 30%,rgba(232,163,58,.25) 50%,transparent 70%); transform:translateX(-100%); animation:shine 4s var(--out) 1s infinite}
+  .step-art{transition:transform .6s var(--out)}
+  .step:hover .step-art{transform:scale(1.02)}
+
+  /* looping SVG scenes */
+  .step-art svg *,.demo svg *,.cta-art *{transform-box:fill-box}
+  .tap{transform-origin:15% 10%; animation:tap 3.4s var(--out) infinite}
+  @keyframes tap{0%{translate:46px 44px; opacity:0} 18%{opacity:1} 44%{translate:0 0; scale:1} 52%{scale:.82} 62%{scale:1} 88%{opacity:1; translate:0 0} 100%{opacity:0; translate:0 0}}
+  .hl{animation:hl 3.4s var(--out) infinite}
+  @keyframes hl{0%,46%{fill:#ffffff; stroke:#e6dfd2} 54%,90%{fill:#fbefd9; stroke:#e8a33a} 100%{fill:#ffffff; stroke:#e6dfd2}}
+  .type-cover{transform-origin:right center; animation:typeCover 5.2s infinite}
+  @keyframes typeCover{0%,10%{transform:scaleX(1); animation-timing-function:steps(21)} 50%,100%{transform:scaleX(0)}}
+  .caret{animation:caret 5.2s infinite}
+  @keyframes caret{0%,10%{translate:-146px 0; animation-timing-function:steps(21)} 50%,100%{translate:0 0}}
+  .ok-in{animation:okIn 5.2s var(--out) infinite}
+  @keyframes okIn{0%,54%{opacity:0; translate:-8px 0} 62%,92%{opacity:1; translate:0 0} 100%{opacity:0}}
+  .paste-in{transform-origin:center; animation:pasteIn 5.2s var(--spring) infinite}
+  @keyframes pasteIn{0%{opacity:0; scale:.7} 8%,90%{opacity:1; scale:1} 100%{opacity:0; scale:1}}
+  .file-in{animation:fileIn 4.2s var(--out) infinite}
+  @keyframes fileIn{0%{opacity:0; translate:0 -16px} 16%,90%{opacity:1; translate:0 0} 100%{opacity:0; translate:0 0}}
+  .pop{transform-origin:center; animation:popC 4.2s var(--spring) infinite}
+  @keyframes popC{0%,20%{scale:0} 32%,90%{scale:1} 100%{scale:0}}
+  .shift{animation:shiftD 4.2s var(--out) infinite}
+  @keyframes shiftD{0%{translate:0 -42px} 16%,100%{translate:0 0}}
+  .js .step:not(.in) .step-art *{animation-play-state:paused}
+  .sweep{animation:sweep 3.4s var(--out) infinite}
+  @keyframes sweep{0%{translate:-140px 0} 60%,100%{translate:470px 0}}
+  .pulse{transform-origin:center; animation:pulse 2.6s ease-in-out infinite}
+  @keyframes pulse{50%{scale:1.06}}
+  .bob{animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{translate:0 9px}}
+  .breath{transform-origin:center; animation:breath 6s ease-in-out infinite}
+  @keyframes breath{50%{scale:1.07}}
+
+  /* FAQ, nav, footer */
+  .faq details p{overflow:hidden}
+  .faq details.closing summary .i{transform:none; color:var(--muted)}
+  .faq summary{transition:color .25s, padding .35s var(--out)}
+  .faq summary:hover{padding-left:10px}
+  .nav.open a{animation:rowIn .5s var(--out) both}
+  .nav.open a:nth-child(2){animation-delay:.04s} .nav.open a:nth-child(3){animation-delay:.08s} .nav.open a:nth-child(4){animation-delay:.12s} .nav.open a:nth-child(5){animation-delay:.16s}
+  .foot-grid ul a{background:linear-gradient(currentColor,currentColor) 0 100% / 0 1px no-repeat; transition:background-size .4s var(--out), color .2s}
+  .foot-grid ul a:hover{background-size:100% 1px}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1020px){
+    .hero-grid{grid-template-columns:1fr; gap:36px}
+    .art{max-width:520px; margin:0 auto; width:100%}
+    .plats{grid-template-columns:1fr 1fr}
+    .plats .plat-card:last-child{grid-column:span 2}
+    .panel{grid-template-columns:1fr}
+    .faq-grid{grid-template-columns:1fr; gap:28px}
+    .bento{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .t-quality{grid-column:span 2; grid-row:auto}
+    .t-a,.t-b,.t-c,.t-name,.t-priv,.t-fast{grid-column:span 1}
+    .t-fast{grid-column:span 2}
+  }
+  @media (max-width:860px){
+    .nav{display:none; position:absolute; left:16px; right:16px; top:72px; flex-direction:column; align-items:stretch; background:var(--white); border:1px solid var(--line); border-radius:18px; padding:8px; box-shadow:var(--shadow-lg)}
+    .nav.open{display:flex; animation:rise .3s var(--ease) both}
+    .nav a{padding:13px 14px; border-radius:12px; font-size:1rem}
+    .menu-btn{display:grid}
+    .bar-cta .btn{display:none}
+    .steps{grid-template-columns:1fr; max-width:520px}
+    .step:nth-child(2){transform:none}
+    .tips{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr 1fr}
+    .foot-grid > div:first-child{grid-column:span 2}
+    .cta{grid-template-columns:1fr}
+    .cta-art{width:220px; right:-50px; bottom:-70px; opacity:.5}
+  }
+  @media (max-width:640px){
+    .container{padding:0 16px}
+    .hero{padding-top:28px}
+    .box{flex-wrap:wrap} .box .field{flex:1 0 100%; padding:0 6px 0 10px} .box .btn.dark{flex:1}
+    .top{grid-template-columns:1fr; padding:18px} .thumb{aspect-ratio:16/10}
     .fmt{grid-template-columns:1fr auto; gap:4px 14px; padding:14px 18px}
     .fmt .d{grid-column:1; grid-row:2}
     .fmt .btn{grid-row:span 2}
-    section.block{grid-template-columns:1fr}
-    .faq div{grid-template-columns:1fr}
+    .foot{padding:14px 18px}
+    .plats{grid-template-columns:1fr} .plats .plat-card:last-child{grid-column:auto}
+    .bento{grid-template-columns:1fr}
+    .t-quality,.t-a,.t-b,.t-c,.t-name,.t-priv,.t-fast{grid-column:auto}
+    .plat-card,.tile,.tip{padding:22px}
+    .sec-head{margin-bottom:32px}
+    .faq summary{font-size:1rem; padding:18px 2px}
   }
   @media (prefers-reduced-motion:reduce){
-    *,*::before{animation:none !important; transition:none !important}
+    *,*::before,*::after{animation:none !important; transition:none !important}
     html{scroll-behavior:auto}
+    .js .rv,.js .hero-copy > :not(h1),.js .art,.js .pi{opacity:1; translate:none; scale:none; rotate:none}
+    .js .w > span{translate:none}
+    .art svg,.tilt{transform:none}
   }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="g-ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#feda75"/><stop offset=".25" stop-color="#fa7e1e"/><stop offset=".55" stop-color="#d62976"/><stop offset=".8" stop-color="#962fbf"/><stop offset="1" stop-color="#4f5bd5"/></linearGradient></defs>
+<symbol id="ph-android-logo" viewBox="0 0 256 256"><g fill="currentColor"><path d="M176,148a12,12,0,1,1-12-12A12,12,0,0,1,176,148ZM92,136a12,12,0,1,0,12,12A12,12,0,0,0,92,136Zm148,24v24a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V161.13A113.38,113.38,0,0,1,51.4,78.72L26.34,53.66A8,8,0,0,1,37.66,42.34L63.82,68.5a111.43,111.43,0,0,1,128.55-.19l26-26a8,8,0,0,1,11.32,11.32L204.82,78.5c.75.71,1.5,1.43,2.24,2.17A111.25,111.25,0,0,1,240,160Zm-16,0a96,96,0,0,0-96-96h-.34C74.91,64.18,32,107.75,32,161.13V184H224Z"/></g></symbol>
+<symbol id="ph-apple-logo" viewBox="0 0 256 256"><g fill="currentColor"><path d="M223.3,169.59a8.07,8.07,0,0,0-2.8-3.4C203.53,154.53,200,134.64,200,120c0-17.67,13.47-33.06,21.5-40.67a8,8,0,0,0,0-11.62C208.82,55.74,187.82,48,168,48a72.2,72.2,0,0,0-40,12.13,71.56,71.56,0,0,0-90.71,9.09A74.63,74.63,0,0,0,16,123.4a127.06,127.06,0,0,0,40.14,89.73A39.8,39.8,0,0,0,83.59,224h87.68a39.84,39.84,0,0,0,29.12-12.57,125,125,0,0,0,17.82-24.6C225.23,174,224.33,172,223.3,169.59Zm-34.63,30.94a23.76,23.76,0,0,1-17.4,7.47H83.59a23.82,23.82,0,0,1-16.44-6.51A111.14,111.14,0,0,1,32,123,58.5,58.5,0,0,1,48.65,80.47,54.81,54.81,0,0,1,88,64h.78A55.45,55.45,0,0,1,123,76.28a8,8,0,0,0,10,0A55.44,55.44,0,0,1,168,64a70.64,70.64,0,0,1,36,10.35c-13,14.52-20,30.47-20,45.65,0,23.77,7.64,42.73,22.18,55.3A105.82,105.82,0,0,1,188.67,200.53ZM128.23,30A40,40,0,0,1,167,0h1a8,8,0,0,1,0,16h-1a24,24,0,0,0-23.24,18,8,8,0,1,1-15.5-4Z"/></g></symbol>
+<symbol id="ph-arrow-right" viewBox="0 0 256 256"><g fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></g></symbol>
+<symbol id="ph-bookmark-simple" viewBox="0 0 256 256"><g fill="currentColor"><path d="M184,32H72A16,16,0,0,0,56,48V224a8,8,0,0,0,12.24,6.78L128,193.43l59.77,37.35A8,8,0,0,0,200,224V48A16,16,0,0,0,184,32Zm0,177.57-51.77-32.35a8,8,0,0,0-8.48,0L72,209.57V48H184Z"/></g></symbol>
+<symbol id="ph-caret-down" viewBox="0 0 256 256"><g fill="currentColor"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></g></symbol>
+<symbol id="ph-check" viewBox="0 0 256 256"><g fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></g></symbol>
+<symbol id="ph-clipboard-text" viewBox="0 0 256 256"><g fill="currentColor"><path d="M168,152a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,152Zm-8-40H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16Zm56-64V216a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V48A16,16,0,0,1,56,32H92.26a47.92,47.92,0,0,1,71.48,0H200A16,16,0,0,1,216,48ZM96,64h64a32,32,0,0,0-64,0ZM200,48H173.25A47.93,47.93,0,0,1,176,64v8a8,8,0,0,1-8,8H88a8,8,0,0,1-8-8V64a47.93,47.93,0,0,1,2.75-16H56V216H200Z"/></g></symbol>
+<symbol id="ph-device-mobile" viewBox="0 0 256 256"><g fill="currentColor"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/></g></symbol>
+<symbol id="ph-download-simple" viewBox="0 0 256 256"><g fill="currentColor"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></g></symbol>
+<symbol id="ph-eye-slash" viewBox="0 0 256 256"><g fill="currentColor"><path d="M53.92,34.62A8,8,0,1,0,42.08,45.38L61.32,66.55C25,88.84,9.38,123.2,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208a127.11,127.11,0,0,0,52.07-10.83l22,24.21a8,8,0,1,0,11.84-10.76Zm47.33,75.84,41.67,45.85a32,32,0,0,1-41.67-45.85ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.16,133.16,0,0,1,25,128c4.69-8.79,19.66-33.39,47.35-49.38l18,19.75a48,48,0,0,0,63.66,70l14.73,16.2A112,112,0,0,1,128,192Zm6-95.43a8,8,0,0,1,3-15.72,48.16,48.16,0,0,1,38.77,42.64,8,8,0,0,1-7.22,8.71,6.39,6.39,0,0,1-.75,0,8,8,0,0,1-8-7.26A32.09,32.09,0,0,0,134,96.57Zm113.28,34.69c-.42.94-10.55,23.37-33.36,43.8a8,8,0,1,1-10.67-11.92A132.77,132.77,0,0,0,231.05,128a133.15,133.15,0,0,0-23.12-30.77C185.67,75.19,158.78,64,128,64a118.37,118.37,0,0,0-19.36,1.57A8,8,0,1,1,106,49.79,134,134,0,0,1,128,48c34.88,0,66.57,13.26,91.66,38.35,18.83,18.83,27.3,37.62,27.65,38.41A8,8,0,0,1,247.31,131.26Z"/></g></symbol>
+<symbol id="ph-file-video" viewBox="0 0 256 256"><g fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40v72a8,8,0,0,0,16,0V40h88V88a8,8,0,0,0,8,8h48V216h-8a8,8,0,0,0,0,16h8a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM155.88,145a8,8,0,0,0-8.12.22l-19.95,12.46A16,16,0,0,0,112,144H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h64a16,16,0,0,0,15.81-13.68l19.95,12.46A8,8,0,0,0,160,216V152A8,8,0,0,0,155.88,145ZM112,208H48V160h64v48Zm32-6.43-16-10V176.43l16-10Z"/></g></symbol>
+<symbol id="ph-film-strip" viewBox="0 0 256 256"><g fill="currentColor"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,88h80v80H40Zm96-16V56h32V72Zm-16,0H88V56h32Zm0,112v16H88V184Zm16,0h32v16H136Zm0-16V88h80v80Zm80-96H184V56h32ZM72,56V72H40V56ZM40,184H72v16H40Zm176,16H184V184h32v16Z"/></g></symbol>
+<symbol id="ph-folder-open" viewBox="0 0 256 256"><g fill="currentColor"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></g></symbol>
+<symbol id="ph-hand-grabbing" viewBox="0 0 256 256"><g fill="currentColor"><path d="M188,80a27.79,27.79,0,0,0-13.36,3.4,28,28,0,0,0-46.64-11A28,28,0,0,0,80,92v20H68a28,28,0,0,0-28,28v12a88,88,0,0,0,176,0V108A28,28,0,0,0,188,80Zm12,72a72,72,0,0,1-144,0V140a12,12,0,0,1,12-12H80v24a8,8,0,0,0,16,0V92a12,12,0,0,1,24,0v28a8,8,0,0,0,16,0V92a12,12,0,0,1,24,0v28a8,8,0,0,0,16,0V108a12,12,0,0,1,24,0Z"/></g></symbol>
+<symbol id="ph-lightning" viewBox="0 0 256 256"><g fill="currentColor"><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></g></symbol>
+<symbol id="ph-link-simple" viewBox="0 0 256 256"><g fill="currentColor"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z"/></g></symbol>
+<symbol id="ph-share-network" viewBox="0 0 256 256"><g fill="currentColor"><path d="M176,160a39.89,39.89,0,0,0-28.62,12.09l-46.1-29.63a39.8,39.8,0,0,0,0-28.92l46.1-29.63a40,40,0,1,0-8.66-13.45l-46.1,29.63a40,40,0,1,0,0,55.82l46.1,29.63A40,40,0,1,0,176,160Zm0-128a24,24,0,1,1-24,24A24,24,0,0,1,176,32ZM64,152a24,24,0,1,1,24-24A24,24,0,0,1,64,152Zm112,72a24,24,0,1,1,24-24A24,24,0,0,1,176,224Z"/></g></symbol>
+<symbol id="ph-sliders-horizontal" viewBox="0 0 256 256"><g fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"/></g></symbol>
+<symbol id="ph-sparkle" viewBox="0 0 256 256"><g fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></g></symbol>
+<symbol id="ph-star4" viewBox="0 0 24 24"><g fill="currentColor"><path d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0Z"/></g></symbol>
+<symbol id="ph-user-minus" viewBox="0 0 256 256"><g fill="currentColor"><path d="M256,136a8,8,0,0,1-8,8H200a8,8,0,0,1,0-16h48A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z"/></g></symbol>
+<symbol id="si-facebook" viewBox="0 0 24 24"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></symbol>
+<symbol id="si-instagram" viewBox="0 0 24 24"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></symbol>
+<symbol id="si-tiktok" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></symbol>
+</svg>
+<div class="progress" aria-hidden="true"></div>
 <a class="skip" href="#url">Skip to the link box</a>
-<div class="wrap">
-  <header>
-    <a class="logo" href="/" aria-label="Dropvid home">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#e0a44a"/><path d="M16 8v11m0 0-5-5m5 5 5-5M10 24h12" stroke="#1a1307" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+<header class="site-header" id="top">
+  <div class="container bar">
+    <a class="logo" href="#top" aria-label="Dropvid home">
+      <span class="logo-mark"><svg class="i"><use href="#ph-download-simple"/></svg></span>
       Dropvid
     </a>
-    <nav aria-label="Page sections"><a href="#how">How it works</a><a href="#faq">FAQ</a></nav>
-  </header>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#platforms">Platforms</a>
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#phone">On your phone</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="bar-cta">
+      <a class="btn dark sm magnetic" href="#top" data-focus-input>Download a video <svg class="i arrow"><use href="#ph-arrow-right"/></svg></a>
+      <button class="menu-btn" id="menuBtn" aria-controls="nav" aria-expanded="false" aria-label="Open menu"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
 
-  <main>
-    <section class="hero">
-      <p class="eyebrow">Free video downloader</p>
-      <h1>Paste a link. <em>Keep the video.</em></h1>
-      <p class="lede">Works with public reels, posts and TikToks. Pick a quality and the MP4 lands in your downloads. No app, no sign-up.</p>
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="pill"><b><svg class="i"><use href="#ph-sparkle"/></svg>Free</b> No app, no account, no limits</span>
+        <h1>Save any reel, post or TikTok <span class="serif">in one paste.</span></h1>
+        <p class="lede">Copy the link from Instagram, Facebook or TikTok, drop it in below and download the MP4 in the quality you want, named and ready to share.</p>
 
-      <form class="box" id="form" autocomplete="off">
-        <label for="url" class="sr-only">Video link</label>
-        <input id="url" type="url" placeholder="https://www.instagram.com/reel/…" spellcheck="false" required>
-        <button type="button" class="btn text" id="paste" title="Paste from clipboard">Paste</button>
-        <button type="submit" class="btn primary" id="go"><span class="spin"></span><span class="lbl">Get video</span></button>
-      </form>
-      <div class="below">
-        <div class="chips" aria-label="Supported platforms">
-          <span class="chip" data-p="instagram">Instagram</span>
-          <span class="chip" data-p="facebook">Facebook</span>
-          <span class="chip" data-p="tiktok">TikTok</span>
+        <form class="box" id="form" autocomplete="off">
+          <label for="url" class="sr-only">Video link</label>
+          <div class="field">
+            <svg class="i"><use href="#ph-link-simple"/></svg>
+            <input id="url" type="url" placeholder="Paste a video link here" spellcheck="false" required>
+          </div>
+          <button type="button" class="btn ghost" id="paste" title="Paste from clipboard"><svg class="i"><use href="#ph-clipboard-text"/></svg>Paste</button>
+          <button type="submit" class="btn dark shine" id="go"><span class="spin"></span><span class="lbl">Get video</span></button>
+        </form>
+        <div class="below">
+          <div class="chips" aria-label="Supported platforms">
+            <span class="chip" data-p="instagram"><svg><use href="#si-instagram"/></svg>Instagram</span>
+            <span class="chip" data-p="facebook"><svg><use href="#si-facebook"/></svg>Facebook</span>
+            <span class="chip" data-p="tiktok"><svg><use href="#si-tiktok"/></svg>TikTok</span>
+          </div>
+          <p class="msg" id="msg" role="status" aria-live="polite"></p>
         </div>
-        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        <ul class="trust">
+          <li><svg class="i"><use href="#ph-check"/></svg>HD when the post has it</li>
+          <li><svg class="i"><use href="#ph-check"/></svg>Works on any phone</li>
+          <li><svg class="i"><use href="#ph-check"/></svg>Nothing to install</li>
+        </ul>
       </div>
-    </section>
 
-    <div class="skel" id="skel" aria-hidden="true">
-      <div class="top">
-        <div class="sk thumb"></div>
-        <div class="meta"><div class="sk line" style="width:18%"></div><div class="sk line" style="width:86%;height:18px"></div><div class="sk line" style="width:62%;height:18px"></div><div class="sk line" style="width:30%"></div></div>
+      <!-- hero illustration -->
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 520 540" fill="none">
+          <defs>
+            <linearGradient id="scr" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f7d49a"/><stop offset=".45" stop-color="#eea26a"/><stop offset=".78" stop-color="#c8705f"/><stop offset="1" stop-color="#5b4a6b"/>
+            </linearGradient>
+            <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6d6a8c"/><stop offset="1" stop-color="#2f2c44"/></linearGradient>
+            <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient>
+            <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#c9bda6"/></pattern>
+            <clipPath id="screenClip"><rect x="172" y="62" width="196" height="416" rx="28"/></clipPath>
+          </defs>
+
+          <rect x="20" y="40" width="480" height="470" rx="40" fill="url(#dots)" opacity=".6"/>
+          <circle cx="270" cy="270" r="210" fill="#f6e2bd" opacity=".55"/>
+          <circle cx="270" cy="270" r="150" fill="#fbefd9"/>
+
+          <!-- phone -->
+          <g class="shadow px" style="--dp:5">
+            <rect x="160" y="50" width="220" height="440" rx="40" fill="#17150f"/>
+            <g clip-path="url(#screenClip)">
+              <rect x="172" y="62" width="196" height="416" fill="url(#scr)"/>
+              <circle cx="300" cy="190" r="34" fill="#fff4d6" opacity=".92"/>
+              <path d="M172 280 C220 250 250 262 290 246 C320 234 345 244 368 236 V478 H172Z" fill="#8b5a5e" opacity=".55"/>
+              <path d="M172 300 H368 V478 H172Z" fill="url(#sea)"/>
+              <path d="M200 318 H250 M268 330 H340 M190 348 H232 M285 356 H330" stroke="#fff" stroke-opacity=".28" stroke-width="3" stroke-linecap="round"/>
+              <rect x="172" y="62" width="196" height="416" fill="url(#fade)"/>
+              <!-- play -->
+              <circle cx="270" cy="262" r="26" fill="#fff" fill-opacity=".92"/>
+              <path d="M262 249 L284 262 L262 275Z" fill="#17150f"/>
+              <!-- side actions -->
+              <g fill="#fff" fill-opacity=".9">
+                <circle cx="346" cy="340" r="11"/><circle cx="346" cy="376" r="11"/><circle cx="346" cy="412" r="11"/>
+              </g>
+              <path d="M341 339.5a3.2 3.2 0 0 1 5-2.6 3.2 3.2 0 0 1 5 2.6c0 3-5 6-5 6s-5-3-5-6Z" fill="#e1306c"/>
+              <!-- caption -->
+              <circle cx="196" cy="424" r="11" fill="#f7d49a" stroke="#fff" stroke-width="2"/>
+              <rect x="214" y="417" width="66" height="7" rx="3.5" fill="#fff"/>
+              <rect x="186" y="442" width="128" height="6" rx="3" fill="#fff" fill-opacity=".7"/>
+              <rect x="186" y="455" width="90" height="6" rx="3" fill="#fff" fill-opacity=".5"/>
+            </g>
+            <rect x="238" y="70" width="64" height="18" rx="9" fill="#17150f"/>
+          </g>
+
+          <!-- link copied chip -->
+          <g class="float-a px pi" style="--dp:14;--pd:.55s">
+            <g class="shadow">
+              <rect x="22" y="118" width="184" height="52" rx="16" fill="#fff"/>
+              <rect x="34" y="130" width="28" height="28" rx="9" fill="#fbefd9"/>
+              <use href="#ph-link-simple" x="40" y="136" width="16" height="16" style="color:#95560b"/>
+              <text x="72" y="142" font-family="Geist, sans-serif" font-size="12.5" font-weight="600" fill="#17150f">Link copied</text>
+              <text x="72" y="158" font-family="Geist Mono, monospace" font-size="10" fill="#6c665a">instagram.com/reel/…</text>
+            </g>
+          </g>
+
+          <!-- brand badges -->
+          <g class="float-b px pi" style="--dp:22;--pd:.7s">
+            <g class="shadow"><circle cx="430" cy="110" r="28" fill="#fff"/></g>
+            <use href="#si-instagram" x="416" y="96" width="28" height="28" fill="url(#g-ig)"/>
+          </g>
+          <g class="float-c px pi" style="--dp:18;--pd:.8s">
+            <g class="shadow"><circle cx="74" cy="300" r="26" fill="#fff"/></g>
+            <use href="#si-tiktok" x="62" y="288" width="24" height="24" fill="#111"/>
+          </g>
+          <g class="float-a px pi" style="--dp:26;--pd:.9s">
+            <g class="shadow"><circle cx="466" cy="244" r="22" fill="#fff"/></g>
+            <use href="#si-facebook" x="455" y="233" width="22" height="22" fill="#0866ff"/>
+          </g>
+
+          <!-- flow arrow -->
+          <path class="dash" d="M372 300 C430 310 460 350 440 392" stroke="#95560b" stroke-width="2" stroke-linecap="round"/>
+          <path d="M432 386 L440 394 L447 384" stroke="#95560b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- download card -->
+          <g class="float-b px pi" style="--dp:10;--pd:1s">
+            <g class="shadow">
+              <rect x="262" y="404" width="236" height="96" rx="20" fill="#fff"/>
+              <rect x="278" y="420" width="44" height="44" rx="12" fill="#17150f"/>
+              <use href="#ph-film-strip" x="288" y="430" width="24" height="24" style="color:#e8a33a"/>
+              <text x="334" y="437" font-family="Geist Mono, monospace" font-size="11.5" font-weight="500" fill="#17150f">sunset-reel-1080p.mp4</text>
+              <text x="334" y="455" font-family="Geist, sans-serif" font-size="11" fill="#6c665a">4.2 MB · MP4 · 1080p</text>
+              <rect x="278" y="478" width="204" height="6" rx="3" fill="#efe9de"/>
+              <rect class="prog" x="278" y="478" width="204" height="6" rx="3" fill="#e8a33a"/>
+            </g>
+          </g>
+        </svg>
       </div>
-      <div class="formats"><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:40%"></div><div class="sk" style="width:104px;height:40px"></div></div><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:32%"></div><div class="sk" style="width:104px;height:40px"></div></div></div>
     </div>
 
-    <article class="result" id="result" aria-label="Video found">
-      <div class="top">
-        <img class="thumb" id="thumb" alt="">
-        <div class="meta">
-          <div class="plat" id="plat"></div>
-          <h2 id="title"></h2>
-          <div class="by" id="by"></div>
+    <!-- results -->
+    <div class="container">
+      <div class="result-wrap">
+        <div class="skel" id="skel" aria-hidden="true">
+          <div class="top">
+            <div class="sk" style="aspect-ratio:4/5;border-radius:14px"></div>
+            <div class="meta"><div class="sk line" style="width:22%;height:22px;border-radius:999px"></div><div class="sk line" style="width:86%;height:20px"></div><div class="sk line" style="width:60%;height:20px"></div><div class="sk line" style="width:30%"></div></div>
+          </div>
+          <div class="formats"><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:40%"></div><div class="sk" style="width:110px;height:40px"></div></div><div class="fmt"><div class="sk line" style="width:64px"></div><div class="sk line" style="width:32%"></div><div class="sk" style="width:110px;height:40px"></div></div></div>
         </div>
-      </div>
-      <div class="formats" id="formats"></div>
-      <div class="foot">
-        <span>Download not starting? <a id="direct" href="#" target="_blank" rel="noopener">Open the video directly</a> and save it from there.</span>
-        <span id="expiry">Links expire after a while. Fetch again if one stops working.</span>
-      </div>
-    </article>
 
-    <section class="block" id="how">
-      <div class="side">
-        <h2>Three steps, no account</h2>
-        <p>Nothing to install. It works the same on a phone or a laptop.</p>
+        <article class="result" id="result" aria-label="Video found">
+          <div class="top">
+            <img class="thumb" id="thumb" alt="">
+            <div class="meta">
+              <span class="plat" id="plat"></span>
+              <h2 id="title"></h2>
+              <div class="by" id="by"></div>
+            </div>
+          </div>
+          <div class="formats" id="formats"></div>
+          <div class="foot">
+            <span>Download not starting? <a id="direct" href="#" target="_blank" rel="noopener">Open the video directly</a> and save it from there.</span>
+            <span id="expiry">Links expire after a while. Fetch again if one stops working.</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MARQUEE ================= -->
+  <div class="marquee" aria-label="Supported content">
+    <div class="mq-track">
+      <div class="mq-group">
+        <span class="mq-item"><svg><use href="#si-instagram" fill="url(#g-ig)"/></svg>Instagram Reels</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">feed videos</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item"><svg><use href="#si-tiktok" fill="#111"/></svg>TikTok videos</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">short share links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item"><svg><use href="#si-facebook" fill="#0866ff"/></svg>Facebook Watch</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">fb.watch links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item">Public stories</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">up to 1080p</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+      </div>
+      <div class="mq-group" aria-hidden="true">
+        <span class="mq-item"><svg><use href="#si-instagram" fill="url(#g-ig)"/></svg>Instagram Reels</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">feed videos</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item"><svg><use href="#si-tiktok" fill="#111"/></svg>TikTok videos</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">short share links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item"><svg><use href="#si-facebook" fill="#0866ff"/></svg>Facebook Watch</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">fb.watch links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item">Public stories</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item serif">up to 1080p</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PLATFORMS ================= -->
+  <section class="sec" id="platforms">
+    <div class="container">
+      <div class="sec-head rv">
+        <div><p class="kicker">Platforms</p><h2 class="title">Works where the videos are</h2></div>
+        <p>Dropvid reads public posts from the three apps people share the most video from. Paste a link from any of them.</p>
+      </div>
+      <div class="plats">
+        <article class="plat-card rv" data-p="instagram">
+          <div class="plat-logo"><svg><use href="#si-instagram"/></svg></div>
+          <h3>Instagram</h3>
+          <p>Reels and video posts from public accounts.</p>
+          <ul class="checks">
+            <li><svg class="i"><use href="#ph-check"/></svg>Reels and feed videos</li>
+            <li><svg class="i"><use href="#ph-check"/></svg>First video in a carousel</li>
+            <li><svg class="i"><use href="#ph-check"/></svg>Stories from public accounts</li>
+          </ul>
+          <code class="eg">instagram.com/reel/C8xQ2…</code>
+        </article>
+        <article class="plat-card rv" data-p="facebook" style="--d:.08s">
+          <div class="plat-logo"><svg><use href="#si-facebook"/></svg></div>
+          <h3>Facebook</h3>
+          <p>Public videos, reels and watch links.</p>
+          <ul class="checks">
+            <li><svg class="i"><use href="#ph-check"/></svg>Videos on pages and profiles</li>
+            <li><svg class="i"><use href="#ph-check"/></svg>Facebook Reels</li>
+            <li><svg class="i"><use href="#ph-check"/></svg>Short fb.watch links</li>
+          </ul>
+          <code class="eg">fb.watch/r4Kd9…</code>
+        </article>
+        <article class="plat-card rv" data-p="tiktok" style="--d:.16s">
+          <div class="plat-logo"><svg><use href="#si-tiktok"/></svg></div>
+          <h3>TikTok</h3>
+          <p>Any public TikTok video, full length.</p>
+          <ul class="checks">
+            <li><svg class="i"><use href="#ph-check"/></svg>Videos from any public profile</li>
+            <li><svg class="i"><use href="#ph-check"/></svg>Share links from the app</li>
+            <li><svg class="i"><use href="#ph-check"/></svg>Every quality TikTok offers</li>
+          </ul>
+          <code class="eg">vm.tiktok.com/ZMh7a…</code>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW ================= -->
+  <section class="sec" id="how">
+    <div class="container">
+      <div class="sec-head rv">
+        <div><p class="kicker">How it works</p><h2 class="title">Three steps, <span class="serif">about ten seconds</span></h2></div>
+        <p>No account and nothing to install. It works the same in a phone browser as on a laptop.</p>
       </div>
       <ol class="steps">
-        <li><b>Copy the link</b><p>On the reel, post or video, tap Share, then Copy link.</p></li>
-        <li><b>Paste it above</b><p>Dropvid recognises the platform and lists every quality it can find.</p></li>
-        <li><b>Save the MP4</b><p>Pick a quality. The file goes straight to your downloads, named after the post.</p></li>
+        <li class="step rv">
+          <span class="step-num"></span>
+          <div class="step-art" aria-hidden="true">
+            <svg viewBox="0 0 320 190" fill="none">
+              <rect x="70" y="26" width="180" height="190" rx="22" fill="#fff" stroke="#e6dfd2"/>
+              <rect x="146" y="36" width="28" height="4" rx="2" fill="#d6cebe"/>
+              <text x="88" y="64" font-family="Geist, sans-serif" font-size="11" font-weight="600" fill="#17150f">Share to</text>
+              <g><circle cx="100" cy="92" r="14" fill="#efe9de"/><circle cx="140" cy="92" r="14" fill="#efe9de"/><circle cx="180" cy="92" r="14" fill="#efe9de"/><circle cx="220" cy="92" r="14" fill="#efe9de"/></g>
+              <use href="#ph-share-network" x="92" y="84" width="16" height="16" style="color:#6c665a"/>
+              <rect class="hl" x="84" y="120" width="152" height="34" rx="10" fill="#fbefd9" stroke="#e8a33a"/>
+              <use href="#ph-link-simple" x="94" y="129" width="16" height="16" style="color:#95560b"/>
+              <text x="118" y="141" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#17150f">Copy link</text>
+              <rect x="84" y="162" width="152" height="10" rx="5" fill="#efe9de"/>
+              <path class="tap" d="M206 140 l0 26 l7 -6 l5 11 l5 -2 l-5 -11 l9 0 z" fill="#17150f" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Copy the link</h3>
+          <p>In the app, tap Share on the reel, post or video, then Copy link.</p>
+        </li>
+        <li class="step rv" style="--d:.1s">
+          <span class="step-num"></span>
+          <div class="step-art" aria-hidden="true">
+            <svg viewBox="0 0 320 190" fill="none">
+              <rect x="24" y="70" width="272" height="52" rx="14" fill="#fff" stroke="#17150f" stroke-width="1.5"/>
+              <rect x="20" y="66" width="280" height="60" rx="18" stroke="#e8a33a" stroke-opacity=".35" stroke-width="4"/>
+              <use href="#ph-link-simple" x="38" y="88" width="16" height="16" style="color:#a19a8b"/>
+              <text x="62" y="101" font-family="Geist Mono, monospace" font-size="11" fill="#17150f">tiktok.com/@maya/vid…</text>
+              <rect class="type-cover" x="60" y="86" width="146" height="22" fill="#fff"/>
+              <rect x="226" y="78" width="60" height="36" rx="10" fill="#17150f"/>
+              <text x="256" y="100" text-anchor="middle" font-family="Geist, sans-serif" font-size="11.5" font-weight="600" fill="#fff">Get</text>
+              <rect class="caret" x="206" y="87" width="1.6" height="18" fill="#17150f"><animate attributeName="opacity" values="1;0;1" dur="1.1s" repeatCount="indefinite"/></rect>
+              <g class="ok-in"><rect x="24" y="140" width="84" height="26" rx="13" fill="#fff" stroke="#e6dfd2"/><use href="#si-tiktok" x="34" y="146" width="14" height="14" fill="#111"/><text x="54" y="157" font-family="Geist, sans-serif" font-size="10.5" font-weight="500" fill="#17150f">TikTok</text></g>
+              <text class="ok-in" x="118" y="157" font-family="Geist, sans-serif" font-size="10.5" fill="#2f7a4a">✓ Link recognised</text>
+              <g class="paste-in"><rect x="24" y="28" width="108" height="28" rx="10" fill="#fbefd9"/><use href="#ph-clipboard-text" x="32" y="34" width="16" height="16" style="color:#95560b"/><text x="54" y="46" font-family="Geist, sans-serif" font-size="11" font-weight="600" fill="#95560b">Pasted</text></g>
+            </svg>
+          </div>
+          <h3>Paste it above</h3>
+          <p>Dropvid recognises the app and lists every quality it can find.</p>
+        </li>
+        <li class="step rv" style="--d:.2s">
+          <span class="step-num"></span>
+          <div class="step-art" aria-hidden="true">
+            <svg viewBox="0 0 320 190" fill="none">
+              <rect x="40" y="30" width="240" height="140" rx="16" fill="#fff" stroke="#e6dfd2"/>
+              <use href="#ph-folder-open" x="56" y="44" width="18" height="18" style="color:#17150f"/>
+              <text x="80" y="57" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#17150f">Downloads</text>
+              <line x1="40" y1="72" x2="280" y2="72" stroke="#e6dfd2"/>
+              <g class="file-in">
+                <rect x="56" y="84" width="30" height="30" rx="8" fill="#17150f"/><use href="#ph-file-video" x="63" y="91" width="16" height="16" style="color:#e8a33a"/>
+                <text x="96" y="97" font-family="Geist Mono, monospace" font-size="10.5" fill="#17150f">maya-sunset-1080p.mp4</text>
+                <text x="96" y="110" font-family="Geist, sans-serif" font-size="10" fill="#6c665a">6.8 MB · just now</text>
+                <g class="pop"><circle cx="260" cy="99" r="10" fill="#e5f2e8"/><use href="#ph-check" x="253" y="92" width="14" height="14" style="color:#2f7a4a"/></g>
+              </g>
+              <g class="shift" opacity=".55">
+                <rect x="56" y="126" width="30" height="30" rx="8" fill="#efe9de"/><use href="#ph-file-video" x="63" y="133" width="16" height="16" style="color:#6c665a"/>
+                <text x="96" y="139" font-family="Geist Mono, monospace" font-size="10.5" fill="#17150f">cafe-tour-720p.mp4</text>
+                <text x="96" y="152" font-family="Geist, sans-serif" font-size="10" fill="#6c665a">3.1 MB · yesterday</text>
+              </g>
+            </svg>
+          </div>
+          <h3>Save the MP4</h3>
+          <p>Pick a quality. The file goes to your downloads, named after the post.</p>
+        </li>
       </ol>
-    </section>
+    </div>
+  </section>
 
-    <section class="block" id="faq">
-      <div class="side">
-        <h2>Questions</h2>
-        <p>The short answers to what people ask most.</p>
+  <!-- ================= FEATURES ================= -->
+  <section class="sec" id="features">
+    <div class="container">
+      <div class="sec-head rv">
+        <div><p class="kicker">Features</p><h2 class="title">Small tool, <span class="serif">careful details</span></h2></div>
+        <p>Built to do one job well: turn a link into a clean video file you can keep.</p>
       </div>
-      <dl class="faq">
-        <div><dt>Which links work?</dt><dd>Public Instagram reels and posts, Facebook videos and reels, and TikTok videos, including short vm.tiktok.com links.</dd></div>
-        <div><dt>Why did a link fail?</dt><dd>The post may be private, deleted, or from an account that requires a login. Instagram also blocks some requests at busy times, so try again in a minute.</dd></div>
-        <div><dt>Where does the file go?</dt><dd>Your browser's normal downloads folder. On iPhone, open the Files app and look in Downloads.</dd></div>
-        <div><dt>Do you keep the videos?</dt><dd>No. The file streams through to you and isn't stored, and neither is the link you paste.</dd></div>
-        <div><dt>Is it free?</dt><dd>Yes, with no account and no download limit.</dd></div>
-      </dl>
+      <div class="bento">
+        <div class="tile t-quality rv">
+          <div class="ico"><svg class="i"><use href="#ph-sliders-horizontal"/></svg></div>
+          <h3>Choose the quality</h3>
+          <p>See every version the platform offers, with the file size, before you download. Go full HD for editing, or smaller to save data.</p>
+          <div class="demo" aria-hidden="true">
+            <svg viewBox="0 0 460 190" fill="none">
+              <rect x="1" y="1" width="458" height="188" rx="16" fill="#fff" stroke="#e6dfd2"/>
+              <g font-family="Geist Mono, monospace" font-size="13">
+                <defs><linearGradient id="sweepG" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><clipPath id="hlClip"><rect x="12" y="12" width="436" height="50" rx="11"/></clipPath></defs>
+                <rect x="12" y="12" width="436" height="50" rx="11" fill="#fbefd9" stroke="#e8a33a"/>
+                <g clip-path="url(#hlClip)"><rect class="sweep" x="12" y="12" width="110" height="50" fill="url(#sweepG)"/></g>
+                <text x="30" y="42" font-weight="500" fill="#17150f">1080p</text>
+                <text x="100" y="42" font-family="Geist, sans-serif" font-size="12" fill="#6c665a">MP4 · 8.4 MB</text>
+                <rect x="190" y="29" width="40" height="18" rx="4" fill="#f6e2bd"/><text x="210" y="42" text-anchor="middle" font-size="9.5" fill="#95560b">BEST</text>
+                <g class="pulse"><rect x="356" y="22" width="80" height="30" rx="8" fill="#17150f"/><text x="396" y="41" text-anchor="middle" font-family="Geist, sans-serif" font-size="11.5" font-weight="600" fill="#fff">Download</text></g>
+                <line x1="24" y1="92" x2="436" y2="92" stroke="#efe9de"/>
+                <text x="30" y="82" font-weight="500" fill="#17150f">720p</text>
+                <text x="100" y="82" font-family="Geist, sans-serif" font-size="12" fill="#6c665a">MP4 · 4.9 MB</text>
+                <rect x="356" y="64" width="80" height="26" rx="8" fill="#fff" stroke="#d6cebe"/><text x="396" y="81" text-anchor="middle" font-family="Geist, sans-serif" font-size="11" font-weight="600" fill="#17150f">Download</text>
+                <text x="30" y="124" font-weight="500" fill="#17150f">540p</text>
+                <text x="100" y="124" font-family="Geist, sans-serif" font-size="12" fill="#6c665a">MP4 · 2.7 MB</text>
+                <rect x="356" y="106" width="80" height="26" rx="8" fill="#fff" stroke="#d6cebe"/><text x="396" y="123" text-anchor="middle" font-family="Geist, sans-serif" font-size="11" font-weight="600" fill="#17150f">Download</text>
+                <line x1="24" y1="140" x2="436" y2="140" stroke="#efe9de"/>
+                <text x="30" y="168" font-weight="500" fill="#a19a8b">360p</text>
+                <text x="100" y="168" font-family="Geist, sans-serif" font-size="12" fill="#a19a8b">MP4 · 1.3 MB</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="tile t-a rv" style="--d:.06s">
+          <div class="ico"><svg class="i"><use href="#ph-user-minus"/></svg></div>
+          <h3>No account, ever</h3>
+          <p>No sign-up, no email, no login with your Instagram or TikTok. Paste and download.</p>
+        </div>
+        <div class="tile t-b t-dark rv" style="--d:.12s">
+          <div class="ico"><svg class="i"><use href="#ph-device-mobile"/></svg></div>
+          <h3>Made for your phone</h3>
+          <p>Most links get copied on a phone, so the page is built for one. Big buttons, one-tap paste.</p>
+        </div>
+        <div class="tile t-name rv">
+          <div class="ico"><svg class="i"><use href="#ph-file-video"/></svg></div>
+          <h3>Files named for you</h3>
+          <p>No more video_8841920.mp4.</p>
+          <span class="filechip"><svg class="i"><use href="#ph-film-strip"/></svg>street-food-lahore-1080p.mp4</span>
+        </div>
+        <div class="tile t-priv rv" style="--d:.06s">
+          <div class="ico"><svg class="i"><use href="#ph-eye-slash"/></svg></div>
+          <h3>We don't keep your videos</h3>
+          <p>The file streams straight to you. Nothing is saved on our side.</p>
+        </div>
+        <div class="tile t-fast rv" style="--d:.12s">
+          <div class="ico"><svg class="i"><use href="#ph-lightning"/></svg></div>
+          <h3>Quick to fetch</h3>
+          <p>Most links are ready to download in a few seconds, with no queue and no ads to click through.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BOOKMARKLET ================= -->
+  <section class="sec" id="bookmark">
+    <div class="container">
+      <div class="panel rv">
+        <div>
+          <p class="kicker">On a computer</p>
+          <h2 class="title">Skip the copy and paste</h2>
+          <p>Drag the button below onto your bookmarks bar. Next time you're watching a video on Instagram, Facebook or TikTok, click it and Dropvid opens with that video ready.</p>
+          <a class="btn bm magnetic" id="bookmarklet" href="#" draggable="true"><svg class="i"><use href="#ph-bookmark-simple"/></svg>Save with Dropvid</a>
+          <div class="bm-note"><svg class="i"><use href="#ph-hand-grabbing"/></svg>Drag it, don't click it. Press Ctrl+Shift+B if your bookmarks bar is hidden.</div>
+        </div>
+        <svg class="browser" viewBox="0 0 480 300" fill="none" aria-hidden="true">
+          <g>
+            <rect x="10" y="14" width="460" height="276" rx="18" fill="#fff" stroke="#e6dfd2"/>
+            <path d="M10 32a18 18 0 0 1 18-18h424a18 18 0 0 1 18 18v28H10Z" fill="#f7f4ee"/>
+            <circle cx="32" cy="37" r="5" fill="#e38b7b"/><circle cx="50" cy="37" r="5" fill="#e8c46a"/><circle cx="68" cy="37" r="5" fill="#9cc59a"/>
+            <rect x="92" y="27" width="300" height="20" rx="10" fill="#fff" stroke="#e6dfd2"/>
+            <text x="106" y="41" font-family="Geist Mono, monospace" font-size="10" fill="#6c665a">instagram.com/reel/C8xQ2mLp…</text>
+            <line x1="10" y1="60" x2="470" y2="60" stroke="#e6dfd2"/>
+            <rect x="22" y="68" width="56" height="16" rx="5" fill="#efe9de"/><rect x="86" y="68" width="44" height="16" rx="5" fill="#efe9de"/>
+            <rect x="138" y="65" width="124" height="22" rx="7" fill="#17150f"/>
+            <use href="#ph-bookmark-simple" x="146" y="69" width="14" height="14" style="color:#e8a33a"/>
+            <text x="166" y="80" font-family="Geist, sans-serif" font-size="10.5" font-weight="600" fill="#fff">Save with Dropvid</text>
+            <line x1="10" y1="94" x2="470" y2="94" stroke="#e6dfd2"/>
+            <rect x="150" y="110" width="180" height="166" rx="12" fill="url(#scr)"/>
+            <circle cx="240" cy="190" r="20" fill="#fff" fill-opacity=".9"/><path d="M234 180 L251 190 L234 200Z" fill="#17150f"/>
+            <rect x="30" y="112" width="100" height="10" rx="5" fill="#efe9de"/><rect x="30" y="130" width="76" height="10" rx="5" fill="#efe9de"/>
+            <rect x="350" y="112" width="100" height="10" rx="5" fill="#efe9de"/><rect x="350" y="130" width="70" height="10" rx="5" fill="#efe9de"/>
+            <path d="M226 96 l0 30 l8 -7 l6 13 l6 -3 l-6 -12 l11 -1 z" fill="#17150f" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PHONE ================= -->
+  <section class="sec" id="phone">
+    <div class="container">
+      <div class="sec-head rv">
+        <div><p class="kicker">On your phone</p><h2 class="title">Where to find the video afterwards</h2></div>
+        <p>Phones put downloads in a folder, not your gallery. Here's how to move a video to your camera roll.</p>
+      </div>
+      <div class="tips">
+        <article class="tip rv">
+          <div class="tip-head"><div class="ico"><svg class="i"><use href="#ph-apple-logo"/></svg></div><div><h3>iPhone and iPad</h3><span>Safari, iOS 13 or later</span></div></div>
+          <ol>
+            <li><span>Tap <b>Download</b>, then confirm with <b>Download</b> in the pop-up.</span></li>
+            <li><span>Open the <b>Files</b> app and go to <b>Downloads</b>.</span></li>
+            <li><span>Open the video, tap <b>Share</b>, then <b>Save Video</b> to add it to Photos.</span></li>
+          </ol>
+        </article>
+        <article class="tip rv" style="--d:.08s">
+          <div class="tip-head"><div class="ico"><svg class="i"><use href="#ph-android-logo"/></svg></div><div><h3>Android</h3><span>Chrome, Samsung Internet and most browsers</span></div></div>
+          <ol>
+            <li><span>Tap <b>Download</b>. A bar shows the progress at the bottom of the screen.</span></li>
+            <li><span>Tap <b>Open</b> when it finishes, or find it in your <b>Downloads</b> folder.</span></li>
+            <li><span>The video also appears in <b>Gallery</b> or <b>Google Photos</b> under Downloads.</span></li>
+          </ol>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section class="sec" id="faq">
+    <div class="container faq-grid">
+      <div class="faq-side rv">
+        <p class="kicker">FAQ</p>
+        <h2 class="title">Questions people ask</h2>
+        <p>Still stuck? Try fetching the link again. Platforms change often, and most failures fix themselves within a day or two.</p>
+      </div>
+      <div class="faq rv" style="--d:.08s">
+        <details open><summary>Which links work?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>Public Instagram reels and posts, Facebook videos and reels, and TikTok videos, including short vm.tiktok.com and fb.watch links. Private accounts and posts that need a login won't work.</p></details>
+        <details><summary>Why did my link fail?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>The post may be private, deleted or age-restricted. Instagram also blocks some requests at busy times, so wait a minute and try again.</p></details>
+        <details><summary>Is it free?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>Yes. There's no account, no subscription and no daily limit.</p></details>
+        <details><summary>Do you keep the videos I download?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>No. The video streams from the platform to your device and isn't stored on our servers.</p></details>
+        <details><summary>Will the TikTok have a watermark?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>It depends on what TikTok provides for that video. When a version without the watermark is available, it's marked in the quality list.</p></details>
+        <details><summary>Can I download someone else's video?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>Only save videos you made or have permission to use. Reposting someone else's work without permission can break copyright law and the platform's rules.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA ================= -->
+  <div class="container">
+    <section class="cta rv" aria-label="Get started">
+      <svg class="cta-art" viewBox="0 0 320 320" fill="none" aria-hidden="true">
+        <circle cx="180" cy="180" r="150" fill="#fbefd9"/>
+        <circle class="breath" cx="180" cy="180" r="100" fill="#f6e2bd"/>
+        <rect x="120" y="96" width="120" height="150" rx="22" fill="#17150f"/>
+        <path class="bob" d="M180 132 v58 m0 0 -22 -22 m22 22 22 -22" stroke="#e8a33a" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="146" y="210" width="68" height="10" rx="5" fill="#e8a33a"/>
+      </svg>
+      <div>
+        <h2>Got a link? <span class="serif">Paste it.</span></h2>
+        <p>Your video is a few seconds away.</p>
+      </div>
+      <a class="btn amber shine magnetic" href="#top" data-focus-input>Download a video <svg class="i arrow"><use href="#ph-arrow-right"/></svg></a>
     </section>
-  </main>
+  </div>
+</main>
 
-  <footer>
-    <p>Only download content you own or have permission to save. Dropvid is not affiliated with Meta or ByteDance.</p>
-    <nav aria-label="Footer"><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#top" onclick="scrollTo({top:0});return false">Back to top</a></nav>
-  </footer>
-</div>
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="#top"><span class="logo-mark"><svg class="i"><use href="#ph-download-simple"/></svg></span>Dropvid</a>
+        <p>A free downloader for Instagram, Facebook and TikTok videos. Only save content you own or have permission to use.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul><li><a href="#platforms">Platforms</a></li><li><a href="#how">How it works</a></li><li><a href="#features">Features</a></li><li><a href="#bookmark">Bookmark button</a></li></ul>
+      </div>
+      <div>
+        <h4>Help</h4>
+        <ul><li><a href="#phone">On your phone</a></li><li><a href="#faq">FAQ</a></li><li><a href="#top" data-focus-input>Download a video</a></li></ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>© <span id="year">2026</span> Dropvid</span>
+      <span>Not affiliated with Meta, Instagram, Facebook, TikTok or ByteDance.</span>
+    </div>
+  </div>
+</footer>
 
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
 <script>
-(() => {
+addEventListener("DOMContentLoaded", () => {
   const API = "/api";
   const $ = s => document.querySelector(s);
   const urlEl = $("#url"), go = $("#go"), msg = $("#msg"), result = $("#result"), skel = $("#skel");
@@ -264,6 +1015,22 @@
   };
   const NAMES = { instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok" };
   const detect = u => Object.keys(PLATFORMS).find(k => PLATFORMS[k].test(u)) || null;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  // Inertia scrolling (skipped for reduced motion or if the library didn't load)
+  let lenis = null;
+  if (!reduce && window.Lenis) {
+    lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+    const raf = t => { lenis.raf(t); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
+  }
+  function scrollToTarget(target) {
+    const offset = typeof target === "number" ? 0 : -84;
+    if (lenis) return lenis.scrollTo(target, { offset, duration: 1.3 });
+    if (typeof target === "number") scrollTo({ top: target, behavior: reduce ? "auto" : "smooth" });
+    else target.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+  }
 
   function setMsg(text, cls = "") { msg.textContent = text; msg.className = "msg " + cls; }
   function highlight(p) { document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.p === p)); }
@@ -310,7 +1077,11 @@
   });
 
   function render(d, platform) {
-    $("#plat").textContent = NAMES[d.platform || platform] || d.platform || platform;
+    skel.classList.remove("show");
+    const p = NAMES[d.platform] ? d.platform : platform;
+    const plat = $("#plat");
+    plat.dataset.p = p;
+    plat.innerHTML = `<svg aria-hidden="true"><use href="#si-${p}"/></svg>${NAMES[p]}`;
     $("#title").textContent = d.title || "Untitled video";
     const bits = [];
     if (d.uploader) bits.push(d.uploader);
@@ -329,18 +1100,170 @@
       row.innerHTML = `
         <div class="q">${esc(f.label)}</div>
         <div class="d">${esc([f.ext?.toUpperCase(), fmtSize(f.filesize), f.note].filter(Boolean).join(" · "))}${i === 0 ? '<span class="tag">Best</span>' : ""}</div>
-        <a class="btn ${i === 0 ? "primary" : "quiet"}" download href="${esc(proxy(f.url, `${base}-${f.label.toLowerCase()}.${f.ext || "mp4"}`, f.h))}">Download</a>`;
+        <a class="btn sm ${i === 0 ? "dark" : "line"}" download href="${esc(proxy(f.url, `${base}-${f.label.toLowerCase()}.${f.ext || "mp4"}`, f.h))}"><svg class="i dl" aria-hidden="true"><use href="#ph-download-simple"/></svg>Download</a>`;
+      row.style.setProperty("--i", i);
       list.appendChild(row);
     });
     $("#direct").href = d.formats?.[0]?.url || "#";
     result.classList.add("show");
-    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const box = result.getBoundingClientRect();
+    if (box.bottom > innerHeight) {
+      if (lenis) lenis.scrollTo(result, { offset: -100, duration: 1.1 });
+      else result.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+    }
   }
 
-  // Support ?url= deep links, e.g. from a browser bookmarklet
+  // "Download a video" buttons scroll up and put the cursor in the link box
+  document.querySelectorAll("[data-focus-input]").forEach(a => a.addEventListener("click", e => {
+    e.preventDefault();
+    closeMenu();
+    scrollToTarget(0);
+    setTimeout(() => urlEl.focus({ preventScroll: true }), reduce ? 0 : 900);
+  }));
+
+  // Mobile menu
+  const menuBtn = $("#menuBtn"), nav = $("#nav");
+  function closeMenu() { nav.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); }
+  menuBtn.addEventListener("click", () => {
+    const open = !nav.classList.contains("open");
+    nav.classList.toggle("open", open); menuBtn.setAttribute("aria-expanded", String(open));
+  });
+  nav.addEventListener("click", e => { if (e.target.closest("a")) closeMenu(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+
+  // Header background once scrolled
+  const header = $(".site-header");
+  const bar = $(".progress");
+  const onScroll = () => {
+    header.classList.toggle("scrolled", scrollY > 8);
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+  };
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+
+  // Highlight the nav link for the section in view
+  const links = [...nav.querySelectorAll("a")];
+  const spy = new IntersectionObserver(entries => entries.forEach(en => {
+    if (en.isIntersecting) links.forEach(l => l.classList.toggle("current", l.hash === "#" + en.target.id));
+  }), { rootMargin: "-45% 0px -50% 0px" });
+  links.forEach(l => { const s = document.querySelector(l.hash); if (s) spy.observe(s); });
+
+  // Reveal on scroll
+  const rv = new IntersectionObserver(entries => entries.forEach(en => {
+    if (en.isIntersecting) { en.target.classList.add("in"); rv.unobserve(en.target); }
+  }), { rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".rv").forEach(el => rv.observe(el));
+
+  // Bookmarklet: opens this site with the current page's link filled in
+  const bm = $("#bookmarklet");
+  bm.href = `javascript:location.href=${JSON.stringify(location.origin + location.pathname + "?url=")}+encodeURIComponent(location.href)`;
+  bm.addEventListener("click", e => { e.preventDefault(); setMsg(""); bm.animate([{ transform: "translateX(0)" }, { transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "translateX(0)" }], { duration: 300 }); });
+
+  $("#year").textContent = new Date().getFullYear();
+
+  // ---------- motion ----------
+  // Split headlines into words so they can rise in one by one
+  function splitWords(el) {
+    let n = 0;
+    (function walk(node) {
+      [...node.childNodes].forEach(ch => {
+        if (ch.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          ch.textContent.split(/(\s+)/).forEach(part => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            const w = document.createElement("span"); w.className = "w";
+            const inner = document.createElement("span"); inner.textContent = part; inner.style.setProperty("--wi", n++);
+            w.appendChild(inner); frag.appendChild(w);
+          });
+          ch.replaceWith(frag);
+        } else if (ch.nodeType === 1) walk(ch);
+      });
+    })(el);
+  }
+  if (!reduce) document.querySelectorAll("h1, h2.title, .cta h2").forEach(splitWords);
+  requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.add("loaded")));
+
+  // Hero illustration follows the pointer (eased)
+  const art = $(".art");
+  if (art && finePointer && !reduce) {
+    let tx = 0, ty = 0, cx = 0, cy = 0, running = false;
+    const tick = () => {
+      cx += (tx - cx) * 0.07; cy += (ty - cy) * 0.07;
+      art.style.setProperty("--mx", cx.toFixed(4)); art.style.setProperty("--my", cy.toFixed(4));
+      if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) requestAnimationFrame(tick); else running = false;
+    };
+    addEventListener("pointermove", e => {
+      tx = (e.clientX / innerWidth - 0.5) * 2; ty = (e.clientY / innerHeight - 0.5) * 2;
+      if (!running) { running = true; requestAnimationFrame(tick); }
+    }, { passive: true });
+  }
+
+  if (finePointer && !reduce) {
+    // Glowing border that tracks the cursor
+    document.querySelectorAll(".plat-card, .step, .tile, .tip").forEach(el => {
+      el.classList.add("spot");
+      el.addEventListener("pointermove", e => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty("--x", `${e.clientX - r.left}px`); el.style.setProperty("--y", `${e.clientY - r.top}px`);
+      });
+    });
+    // Gentle 3D tilt
+    document.querySelectorAll(".plat-card, .tip").forEach(el => {
+      el.classList.add("tilt");
+      el.addEventListener("pointermove", e => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+        el.classList.add("tilting");
+        el.style.setProperty("--ry", `${(px * 7).toFixed(2)}deg`); el.style.setProperty("--rx", `${(-py * 7).toFixed(2)}deg`);
+      });
+      el.addEventListener("pointerleave", () => {
+        el.classList.remove("tilting");
+        el.style.setProperty("--ry", "0deg"); el.style.setProperty("--rx", "0deg");
+      });
+    });
+    // Magnetic buttons
+    document.querySelectorAll(".magnetic").forEach(el => {
+      el.addEventListener("pointermove", e => {
+        const r = el.getBoundingClientRect();
+        el.style.translate = `${((e.clientX - r.left) / r.width - 0.5) * 12}px ${((e.clientY - r.top) / r.height - 0.5) * 10}px`;
+      });
+      el.addEventListener("pointerleave", () => { el.style.translate = ""; });
+    });
+  }
+
+  // Smooth in-page links
+  document.addEventListener("click", e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a || a.hasAttribute("data-focus-input") || a.id === "bookmarklet" || a.hash.length < 2) return;
+    const t = a.hash === "#top" ? 0 : document.querySelector(a.hash);
+    if (t === null) return;
+    e.preventDefault(); closeMenu(); scrollToTarget(t);
+    history.replaceState(null, "", a.hash);
+  });
+
+  // FAQ opens and closes with a height animation
+  document.querySelectorAll(".faq details").forEach(d => {
+    const body = d.querySelector("p");
+    d.querySelector("summary").addEventListener("click", e => {
+      if (reduce || d.classList.contains("closing")) return;
+      e.preventDefault();
+      const ease = "cubic-bezier(.16,1,.3,1)";
+      if (d.open) {
+        d.classList.add("closing");
+        const anim = body.animate([{ height: body.offsetHeight + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 320, easing: ease });
+        anim.onfinish = () => { d.open = false; d.classList.remove("closing"); };
+      } else {
+        d.open = true;
+        body.animate([{ height: "0px", opacity: 0, transform: "translateY(-6px)" }, { height: body.offsetHeight + "px", opacity: 1, transform: "none" }], { duration: 480, easing: ease });
+      }
+    });
+  });
+
+  // Support ?url= deep links (used by the bookmark button)
   const pre = new URLSearchParams(location.search).get("url");
   if (pre) { urlEl.value = pre; urlEl.dispatchEvent(new Event("input")); $("#form").requestSubmit(); }
-})();
+});
 </script>
 </body>
 </html>
