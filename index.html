@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dropvid — Instagram, Facebook & TikTok video downloader</title>
-<meta name="description" content="Paste a link from Instagram, Facebook or TikTok, pick a quality and save the MP4. Free, no app, no sign-up.">
+<title>Dropvid — Instagram, Facebook, TikTok & YouTube video downloader</title>
+<meta name="description" content="Paste a link from Instagram, Facebook, TikTok or YouTube, pick a quality and save the MP4. Free, no app, no sign-up.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Dropvid — save videos from Instagram, Facebook & TikTok">
+<meta property="og:title" content="Dropvid — save videos from Instagram, Facebook, TikTok & YouTube">
 <meta property="og:description" content="Paste a link, pick a quality, save the MP4. Free, no app, no sign-up.">
 <meta name="theme-color" content="#f7f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317150f'/%3E%3Cpath d='M16 8v11m0 0-5-5m5 5 5-5M10 24h12' stroke='%23e8a33a' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -21,7 +21,7 @@
     --line:#e6dfd2; --line-2:#d6cebe;
     --accent:#e8a33a; --accent-deep:#95560b; --accent-wash:#fbefd9; --accent-wash-2:#f6e2bd;
     --ok:#2f7a4a; --ok-wash:#e5f2e8; --err:#b0402d; --err-wash:#fbe9e5;
-    --ig:#e1306c; --fb:#0866ff; --tt:#111111;
+    --ig:#e1306c; --fb:#0866ff; --tt:#111111; --yt:#ff0033;
     --r-sm:10px; --r:16px; --r-lg:24px; --r-xl:32px;
     --shadow-sm:0 1px 2px rgba(60,44,20,.06), 0 2px 8px -2px rgba(60,44,20,.08);
     --shadow:0 2px 4px rgba(60,44,20,.04), 0 18px 40px -18px rgba(60,44,20,.22);
@@ -112,7 +112,7 @@
   .chip{display:inline-flex; align-items:center; gap:7px; padding:6px 11px 6px 8px; border-radius:999px; font-size:.84rem; color:var(--muted); border:1px solid transparent; transition:all .25s var(--ease)}
   .chip svg{width:16px; height:16px; fill:var(--faint); transition:fill .25s}
   .chip.active{background:var(--white); border-color:var(--line); color:var(--ink); box-shadow:var(--shadow-sm)}
-  .chip.active[data-p=instagram] svg{fill:url(#g-ig)} .chip.active[data-p=facebook] svg{fill:var(--fb)} .chip.active[data-p=tiktok] svg{fill:var(--tt)}
+  .chip.active[data-p=instagram] svg{fill:url(#g-ig)} .chip.active[data-p=facebook] svg{fill:var(--fb)} .chip.active[data-p=tiktok] svg{fill:var(--tt)} .chip.active[data-p=youtube] svg{fill:var(--yt)}
   .msg{font-size:.9rem; color:var(--muted); margin:0; display:inline-flex; align-items:center; gap:8px}
   .msg:empty{display:none}
   .msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
@@ -140,7 +140,7 @@
   .result::before{content:""; position:absolute; inset:0 0 auto 0; height:260px; pointer-events:none; background:radial-gradient(640px 260px at 18% -30%, var(--accent-wash), transparent 70%)}
   .r-grid{position:relative; display:grid; grid-template-columns:minmax(0,330px) minmax(0,1fr); gap:32px; padding:28px}
   /* wide videos: player across the top, details and download side by side below */
-  .result.landscape .r-grid{grid-template-columns:1fr; gap:26px}
+  .result.landscape .r-grid{grid-template-columns:minmax(0,1fr); gap:26px}
   .result.landscape .player{max-height:480px}
   .result.landscape .r-body{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); grid-template-rows:auto auto auto 1fr; gap:20px 28px; align-items:start}
   .result.landscape .r-body > :not(.r-side){grid-column:1}
@@ -161,7 +161,7 @@
   .badge{position:absolute; z-index:2; display:inline-flex; align-items:center; gap:6px; padding:6px 11px 6px 8px; border-radius:999px; font:500 .76rem var(--mono); background:rgba(255,255,255,.94); color:var(--ink); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); transition:opacity .3s}
   .badge svg{width:14px; height:14px}
   .badge.plat{top:12px; left:12px}
-  .badge.plat[data-p=instagram] svg{fill:url(#g-ig)} .badge.plat[data-p=facebook] svg{fill:var(--fb)} .badge.plat[data-p=tiktok] svg{fill:var(--tt)}
+  .badge.plat[data-p=instagram] svg{fill:url(#g-ig)} .badge.plat[data-p=facebook] svg{fill:var(--fb)} .badge.plat[data-p=tiktok] svg{fill:var(--tt)} .badge.plat[data-p=youtube] svg{fill:var(--yt)}
   .badge.dur{bottom:12px; right:12px; padding:5px 9px; background:rgba(14,13,11,.72); color:#fff}
   .player.playing::after,.player.playing .play,.player.playing .play-hint,.player.playing .badge{opacity:0; pointer-events:none}
   .media-meta{display:flex; justify-content:space-between; gap:8px; padding:0 4px; font:400 .76rem var(--mono); color:var(--muted)}
@@ -214,16 +214,23 @@
   .q-opt{position:relative; text-align:left; border:1.5px solid var(--line); background:var(--white); border-radius:14px; padding:12px 14px; font:inherit; color:inherit; cursor:pointer; transition:border-color .25s, box-shadow .25s, transform .35s cubic-bezier(.34,1.56,.64,1)}
   .q-opt:hover{border-color:var(--line-2); transform:translateY(-2px)}
   .q-opt[aria-checked=true]{border-color:var(--ink); box-shadow:0 0 0 4px rgba(232,163,58,.24)}
-  .q-res{display:flex; align-items:center; gap:6px; font:600 1.05rem var(--mono); letter-spacing:-.02em}
+  .q-res{display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; padding-right:24px; font:600 1.05rem var(--mono); letter-spacing:-.02em}
   .q-meta{display:block; margin-top:3px; font-size:.78rem; color:var(--muted); font-variant-numeric:tabular-nums}
   .q-opt .dot{position:absolute; top:13px; right:12px; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--line-2); display:grid; place-items:center; transition:background .25s, border-color .25s}
   .q-opt[aria-checked=true] .dot{background:var(--ink); border-color:var(--ink)}
   .q-opt[aria-checked=true] .dot::after{content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); animation:chipPop .45s cubic-bezier(.34,1.56,.64,1)}
+  .q-silent{display:flex; align-items:center; gap:4px; margin-top:3px; font-size:.76rem; color:var(--accent-deep); font-weight:500}
+  .q-silent .i{width:13px; height:13px}
+  .q-meta .ico-s .i{width:13px; height:13px}
+  .q-opt.k-audio .q-res .i{width:17px; height:17px; color:var(--accent-deep)}
+  .tag.hd{background:var(--ink); color:#fff}
+  .q-note{display:flex; gap:10px; align-items:flex-start; margin:0; padding:12px 14px; border-radius:14px; background:var(--accent-wash); border:1px solid var(--accent-wash-2); color:var(--ink-2); font-size:.88rem; line-height:1.5; animation:rowIn .45s var(--out) both}
+  .q-note .i{width:18px; height:18px; flex:none; margin-top:1px; color:var(--accent-deep)}
   .tag{font:500 .64rem var(--mono); padding:2px 6px; border-radius:5px; background:var(--accent-wash); color:var(--accent-deep); text-transform:uppercase; letter-spacing:.06em}
 
   .r-side{display:flex; flex-direction:column; gap:20px; min-width:0}
   .r-actions{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
-  .btn.big{flex:1 1 280px; height:58px; padding:0 24px; font-size:1.02rem; border-radius:15px}
+  .btn.big{flex:1 1 280px; min-width:0; height:auto; min-height:58px; padding:10px 24px; font-size:1.02rem; border-radius:15px; white-space:normal; text-align:center; flex-wrap:wrap; column-gap:8px; row-gap:0}
   .btn.big small{font:400 .8rem var(--mono); opacity:.6}
   .r-actions .btn.line,.r-actions .btn.ghost{height:58px; border-radius:15px}
   .foot{position:relative; padding:14px 28px 16px; font-size:.85rem; color:var(--muted); background:var(--surface); display:flex; justify-content:space-between; gap:8px 24px; flex-wrap:wrap; border-top:1px solid var(--line)}
@@ -246,16 +253,18 @@
   .sec-head p{color:var(--muted); max-width:42ch; margin:0; text-wrap:pretty}
 
   /* platforms */
-  .plats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px}
+  .plats{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px}
+  .checks li.warn{color:var(--muted)} .checks li.warn .i{color:var(--accent-deep)}
   .plat-card{position:relative; background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; overflow:hidden; transition:transform .3s var(--ease), box-shadow .3s var(--ease)}
   .plat-card:hover{--ty:-4px; box-shadow:var(--shadow)}
   .plat-card::after{content:""; position:absolute; right:-60px; top:-60px; width:180px; height:180px; border-radius:50%; background:var(--glow); opacity:.09; transition:opacity .3s}
   .plat-card:hover::after{opacity:.16}
-  .plat-card[data-p=instagram]{--glow:#e1306c} .plat-card[data-p=facebook]{--glow:#0866ff} .plat-card[data-p=tiktok]{--glow:#25f4ee}
+  .plat-card[data-p=instagram]{--glow:#e1306c} .plat-card[data-p=facebook]{--glow:#0866ff} .plat-card[data-p=tiktok]{--glow:#25f4ee} .plat-card[data-p=youtube]{--glow:#ff0033}
   .plat-logo{width:52px; height:52px; border-radius:14px; display:grid; place-items:center; margin-bottom:22px}
   .plat-logo svg{width:26px; height:26px; fill:#fff}
   .plat-card[data-p=instagram] .plat-logo{background:linear-gradient(45deg,#feda75 0%,#fa7e1e 25%,#d62976 55%,#962fbf 80%,#4f5bd5 100%)}
   .plat-card[data-p=facebook] .plat-logo{background:#0866ff}
+  .plat-card[data-p=youtube] .plat-logo{background:#ff0033}
   .plat-card[data-p=tiktok] .plat-logo{background:#111; box-shadow:-2px -2px 0 #25f4ee inset, 2px 2px 0 #fe2c55 inset}
   .plat-card h3{margin:0 0 6px; font-size:1.22rem; letter-spacing:-.02em; font-weight:600}
   .plat-card > p{margin:0 0 20px; color:var(--muted); font-size:.93rem}
@@ -497,7 +506,6 @@
     .hero-grid{grid-template-columns:1fr; gap:36px}
     .art{max-width:520px; margin:0 auto; width:100%}
     .plats{grid-template-columns:1fr 1fr}
-    .plats .plat-card:last-child{grid-column:span 2}
     .panel{grid-template-columns:1fr}
     .faq-grid{grid-template-columns:1fr; gap:28px}
     .bento{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -506,7 +514,7 @@
     .t-fast{grid-column:span 2}
   }
   @media (max-width:860px){
-    .r-grid,.result.landscape .r-grid{grid-template-columns:1fr; gap:22px; padding:18px}
+    .r-grid,.result.landscape .r-grid{grid-template-columns:minmax(0,1fr); gap:22px; padding:18px}
     .player{max-height:none}
     .r-media{width:100%; max-width:330px; margin:0 auto}
     .result.landscape .r-media{max-width:none}
@@ -533,7 +541,7 @@
     .r-actions .btn.line,.r-actions .btn.ghost{flex:1 1 140px}
     .toast{left:16px; right:16px; translate:0 24px; justify-content:center}
     .toast.show{translate:0 0}
-    .plats{grid-template-columns:1fr} .plats .plat-card:last-child{grid-column:auto}
+    .plats{grid-template-columns:1fr}
     .bento{grid-template-columns:1fr}
     .t-quality,.t-a,.t-b,.t-c,.t-name,.t-priv,.t-fast{grid-column:auto}
     .plat-card,.tile,.tip{padding:22px}
@@ -572,18 +580,22 @@
 <symbol id="ph-folder-open" viewBox="0 0 256 256"><g fill="currentColor"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></g></symbol>
 <symbol id="ph-hand-grabbing" viewBox="0 0 256 256"><g fill="currentColor"><path d="M188,80a27.79,27.79,0,0,0-13.36,3.4,28,28,0,0,0-46.64-11A28,28,0,0,0,80,92v20H68a28,28,0,0,0-28,28v12a88,88,0,0,0,176,0V108A28,28,0,0,0,188,80Zm12,72a72,72,0,0,1-144,0V140a12,12,0,0,1,12-12H80v24a8,8,0,0,0,16,0V92a12,12,0,0,1,24,0v28a8,8,0,0,0,16,0V92a12,12,0,0,1,24,0v28a8,8,0,0,0,16,0V108a12,12,0,0,1,24,0Z"/></g></symbol>
 <symbol id="ph-heart" viewBox="0 0 256 256"><g fill="currentColor"><path d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z"/></g></symbol>
+<symbol id="ph-info" viewBox="0 0 256 256"><g fill="currentColor"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/></g></symbol>
 <symbol id="ph-lightning" viewBox="0 0 256 256"><g fill="currentColor"><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></g></symbol>
 <symbol id="ph-link-simple" viewBox="0 0 256 256"><g fill="currentColor"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z"/></g></symbol>
+<symbol id="ph-music-notes" viewBox="0 0 256 256"><g fill="currentColor"><path d="M212.92,17.69a8,8,0,0,0-6.86-1.45l-128,32A8,8,0,0,0,72,56V166.08A36,36,0,1,0,88,196V110.25l112-28v51.83A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.69ZM52,216a20,20,0,1,1,20-20A20,20,0,0,1,52,216ZM88,93.75V62.25l112-28v31.5ZM180,184a20,20,0,1,1,20-20A20,20,0,0,1,180,184Z"/></g></symbol>
 <symbol id="ph-play" viewBox="0 0 256 256"><g fill="currentColor"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></g></symbol>
 <symbol id="ph-share-network" viewBox="0 0 256 256"><g fill="currentColor"><path d="M176,160a39.89,39.89,0,0,0-28.62,12.09l-46.1-29.63a39.8,39.8,0,0,0,0-28.92l46.1-29.63a40,40,0,1,0-8.66-13.45l-46.1,29.63a40,40,0,1,0,0,55.82l46.1,29.63A40,40,0,1,0,176,160Zm0-128a24,24,0,1,1-24,24A24,24,0,0,1,176,32ZM64,152a24,24,0,1,1,24-24A24,24,0,0,1,64,152Zm112,72a24,24,0,1,1,24-24A24,24,0,0,1,176,224Z"/></g></symbol>
 <symbol id="ph-sliders-horizontal" viewBox="0 0 256 256"><g fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"/></g></symbol>
 <symbol id="ph-sparkle" viewBox="0 0 256 256"><g fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></g></symbol>
+<symbol id="ph-speaker-slash" viewBox="0 0 256 256"><g fill="currentColor"><path d="M53.92,34.62A8,8,0,1,0,42.08,45.38L73.55,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V175.09l42.08,46.29a8,8,0,1,0,11.84-10.76ZM32,96H72v64H32ZM144,207.64,88,164.09V95.89l56,61.6Zm42-63.77a24,24,0,0,0,0-31.72,8,8,0,1,1,12-10.57,40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.59Zm-80.16-76a8,8,0,0,1,1.4-11.23l39.85-31A8,8,0,0,1,160,32v74.83a8,8,0,0,1-16,0V48.36l-26.94,21A8,8,0,0,1,105.84,67.91ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z"/></g></symbol>
 <symbol id="ph-star4" viewBox="0 0 24 24"><g fill="currentColor"><path d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0Z"/></g></symbol>
 <symbol id="ph-text-align-left" viewBox="0 0 256 256"><g fill="currentColor"><path d="M32,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H40A8,8,0,0,1,32,64Zm8,48H168a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16Zm176,24H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Zm-48,40H40a8,8,0,0,0,0,16H168a8,8,0,0,0,0-16Z"/></g></symbol>
 <symbol id="ph-user-minus" viewBox="0 0 256 256"><g fill="currentColor"><path d="M256,136a8,8,0,0,1-8,8H200a8,8,0,0,1,0-16h48A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z"/></g></symbol>
 <symbol id="si-facebook" viewBox="0 0 24 24"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></symbol>
 <symbol id="si-instagram" viewBox="0 0 24 24"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></symbol>
 <symbol id="si-tiktok" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></symbol>
+<symbol id="si-youtube" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></symbol>
 </svg>
 <div class="progress" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><svg class="i"><use href="#ph-check-circle"/></svg><span></span></div>
@@ -615,8 +627,8 @@
     <div class="container hero-grid">
       <div class="hero-copy">
         <span class="pill"><b><svg class="i"><use href="#ph-sparkle"/></svg>Free</b> No app, no account, no limits</span>
-        <h1>Save any reel, post or TikTok <span class="serif">in one paste.</span></h1>
-        <p class="lede">Copy the link from Instagram, Facebook or TikTok, drop it in below and download the MP4 in the quality you want, named and ready to share.</p>
+        <h1>Save any reel, TikTok or YouTube video <span class="serif">in one paste.</span></h1>
+        <p class="lede">Copy the link from Instagram, Facebook, TikTok or YouTube, drop it in below and pick from every quality the video comes in, named and ready to share.</p>
 
         <form class="box" id="form" autocomplete="off">
           <label for="url" class="sr-only">Video link</label>
@@ -632,6 +644,7 @@
             <span class="chip" data-p="instagram"><svg><use href="#si-instagram"/></svg>Instagram</span>
             <span class="chip" data-p="facebook"><svg><use href="#si-facebook"/></svg>Facebook</span>
             <span class="chip" data-p="tiktok"><svg><use href="#si-tiktok"/></svg>TikTok</span>
+            <span class="chip" data-p="youtube"><svg><use href="#si-youtube"/></svg>YouTube</span>
           </div>
           <p class="msg" id="msg" role="status" aria-live="polite"></p>
         </div>
@@ -792,6 +805,7 @@
                 <div class="q-list" id="formats" role="radiogroup" aria-labelledby="qLabel"></div>
               </section>
 
+              <p class="q-note" id="qNote" hidden><svg class="i"><use href="#ph-speaker-slash"/></svg><span>This quality is silent video. YouTube keeps the sound in a separate file, so download <b>Audio</b> as well if you need it.</span></p>
               <div class="r-actions">
                 <a class="btn dark big shine" id="dlBtn" href="#" download><svg class="i dl"><use href="#ph-download-simple"/></svg><span id="dlLabel">Download</span><small id="dlSize"></small></a>
                 <button class="btn line" id="copyLink" type="button"><svg class="i"><use href="#ph-link-simple"/></svg>Copy post link</button>
@@ -819,6 +833,7 @@
         <span class="mq-item serif">short share links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item"><svg><use href="#si-facebook" fill="#0866ff"/></svg>Facebook Watch</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item serif">fb.watch links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item"><svg><use href="#si-youtube" fill="#ff0033"/></svg>YouTube Shorts</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item">Public stories</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item serif">up to 1080p</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
       </div>
@@ -829,6 +844,7 @@
         <span class="mq-item serif">short share links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item"><svg><use href="#si-facebook" fill="#0866ff"/></svg>Facebook Watch</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item serif">fb.watch links</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
+        <span class="mq-item"><svg><use href="#si-youtube" fill="#ff0033"/></svg>YouTube Shorts</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item">Public stories</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
         <span class="mq-item serif">up to 1080p</span><svg class="mq-sep"><use href="#ph-star4"/></svg>
       </div>
@@ -840,7 +856,7 @@
     <div class="container">
       <div class="sec-head rv">
         <div><p class="kicker">Platforms</p><h2 class="title">Works where the videos are</h2></div>
-        <p>Dropvid reads public posts from the three apps people share the most video from. Paste a link from any of them.</p>
+        <p>Dropvid reads public posts from the four apps people share the most video from. Paste a link from any of them.</p>
       </div>
       <div class="plats">
         <article class="plat-card rv" data-p="instagram">
@@ -875,6 +891,17 @@
             <li><svg class="i"><use href="#ph-check"/></svg>Every quality TikTok offers</li>
           </ul>
           <code class="eg">vm.tiktok.com/ZMh7a…</code>
+        </article>
+        <article class="plat-card rv" data-p="youtube" style="--d:.24s">
+          <div class="plat-logo"><svg><use href="#si-youtube"/></svg></div>
+          <h3>YouTube</h3>
+          <p>Public videos and Shorts, up to 4K.</p>
+          <ul class="checks">
+            <li><svg class="i"><use href="#ph-check"/></svg>Every quality the video has</li>
+            <li><svg class="i"><use href="#ph-check"/></svg>Audio-only download</li>
+            <li class="warn"><svg class="i"><use href="#ph-info"/></svg>Most qualities are silent video</li>
+          </ul>
+          <code class="eg">youtu.be/dQw4w9WgXcQ</code>
         </article>
       </div>
     </div>
@@ -995,7 +1022,7 @@
         <div class="tile t-a rv" style="--d:.06s">
           <div class="ico"><svg class="i"><use href="#ph-user-minus"/></svg></div>
           <h3>No account, ever</h3>
-          <p>No sign-up, no email, no login with your Instagram or TikTok. Paste and download.</p>
+          <p>No sign-up, no email, no login with your Instagram, TikTok or YouTube. Paste and download.</p>
         </div>
         <div class="tile t-b t-dark rv" style="--d:.12s">
           <div class="ico"><svg class="i"><use href="#ph-device-mobile"/></svg></div>
@@ -1029,7 +1056,7 @@
         <div>
           <p class="kicker">On a computer</p>
           <h2 class="title">Skip the copy and paste</h2>
-          <p>Drag the button below onto your bookmarks bar. Next time you're watching a video on Instagram, Facebook or TikTok, click it and Dropvid opens with that video ready.</p>
+          <p>Drag the button below onto your bookmarks bar. Next time you're watching a video on Instagram, Facebook, TikTok or YouTube, click it and Dropvid opens with that video ready.</p>
           <a class="btn bm magnetic" id="bookmarklet" href="#" draggable="true"><svg class="i"><use href="#ph-bookmark-simple"/></svg>Save with Dropvid</a>
           <div class="bm-note"><svg class="i"><use href="#ph-hand-grabbing"/></svg>Drag it, don't click it. Press Ctrl+Shift+B if your bookmarks bar is hidden.</div>
         </div>
@@ -1094,8 +1121,9 @@
         <p>Still stuck? Try fetching the link again. Platforms change often, and most failures fix themselves within a day or two.</p>
       </div>
       <div class="faq rv" style="--d:.08s">
-        <details open><summary>Which links work?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>Public Instagram reels and posts, Facebook videos and reels, and TikTok videos, including short vm.tiktok.com and fb.watch links. Private accounts and posts that need a login won't work.</p></details>
+        <details open><summary>Which links work?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>Public Instagram reels and posts, Facebook videos and reels, TikTok videos, and YouTube videos and Shorts, including short vm.tiktok.com, fb.watch and youtu.be links. Private accounts and posts that need a login won't work.</p></details>
         <details><summary>Why did my link fail?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>The post may be private, deleted or age-restricted. Instagram also blocks some requests at busy times, so wait a minute and try again.</p></details>
+        <details><summary>Why do some YouTube qualities have no sound?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>YouTube stores the picture and the sound of most videos as two separate files, and joining them takes more processing than Dropvid's servers can do. Qualities marked "No sound" are silent video. Download the Audio option as well if you need the sound. Large YouTube files can also be slow to arrive.</p></details>
         <details><summary>Is it free?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>Yes. There's no account, no subscription and no daily limit.</p></details>
         <details><summary>Do you keep the videos I download?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>No. The video streams from the platform to your device and isn't stored on our servers.</p></details>
         <details><summary>Will the TikTok have a watermark?<svg class="i"><use href="#ph-caret-down"/></svg></summary><p>It depends on what TikTok provides for that video. When a version without the watermark is available, it's marked in the quality list.</p></details>
@@ -1128,7 +1156,7 @@
     <div class="foot-grid">
       <div>
         <a class="logo" href="#top"><span class="logo-mark"><svg class="i"><use href="#ph-download-simple"/></svg></span>Dropvid</a>
-        <p>A free downloader for Instagram, Facebook and TikTok videos. Only save content you own or have permission to use.</p>
+        <p>A free downloader for Instagram, Facebook, TikTok and YouTube videos. Only save content you own or have permission to use.</p>
       </div>
       <div>
         <h4>Product</h4>
@@ -1141,7 +1169,7 @@
     </div>
     <div class="legal">
       <span>© <span id="year">2026</span> Dropvid</span>
-      <span>Not affiliated with Meta, Instagram, Facebook, TikTok or ByteDance.</span>
+      <span>Not affiliated with Meta, TikTok, ByteDance, Google or YouTube.</span>
     </div>
   </div>
 </footer>
@@ -1156,8 +1184,9 @@ addEventListener("DOMContentLoaded", () => {
     instagram: /^https?:\/\/(www\.)?instagram\.com\//i,
     facebook:  /^https?:\/\/(www\.|m\.|web\.|fb\.)?(facebook\.com|fb\.watch)\//i,
     tiktok:    /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i,
+    youtube:   /^https?:\/\/((www\.|m\.|music\.)?youtube\.com|youtu\.be)\//i,
   };
-  const NAMES = { instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok" };
+  const NAMES = { instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", youtube: "YouTube" };
   const detect = u => Object.keys(PLATFORMS).find(k => PLATFORMS[k].test(u)) || null;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -1199,7 +1228,7 @@ addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const url = urlEl.value.trim();
     const platform = detect(url);
-    if (!platform) return setMsg("That isn't an Instagram, Facebook or TikTok link.", "err");
+    if (!platform) return setMsg("That isn't an Instagram, Facebook, TikTok or YouTube link.", "err");
 
     result.classList.remove("show");
     resetPlayer();
@@ -1260,9 +1289,18 @@ addEventListener("DOMContentLoaded", () => {
     vid.pause(); vid.removeAttribute("src"); vid.load(); vid.hidden = true;
     player.classList.remove("playing");
   }
+  // Preview with sound when the post has it, otherwise a modest silent version (never a 4K stream)
+  function previewFormat() {
+    const withSound = fmts.find(f => f.kind === "av");
+    if (withSound) return withSound;
+    const silent = fmts.filter(f => f.kind === "video");
+    const sz = f => Math.min(f.width || 0, f.height || 0) || f.height || 0;
+    return silent.slice().sort((a, b) => Math.abs(sz(a) - 480) - Math.abs(sz(b) - 480))[0] || current;
+  }
   $("#playBtn").addEventListener("click", () => {
     if (!current) return;
-    vid.src = proxy(current.url, "", current.h, true);
+    const pf = previewFormat();
+    vid.src = proxy(pf.url, "", pf.h, true);
     if (thumb.src) vid.poster = thumb.src;
     vid.hidden = false; player.classList.add("playing");
     vid.play().catch(() => {});
@@ -1272,10 +1310,12 @@ addEventListener("DOMContentLoaded", () => {
     current = fmts[i];
     [...qList.children].forEach((b, j) => { b.setAttribute("aria-checked", String(i === j)); b.tabIndex = i === j ? 0 : -1; });
     dlBtn.href = proxy(current.url, `${baseName}-${current.label.toLowerCase()}.${current.ext || "mp4"}`, current.h);
-    $("#dlLabel").textContent = `Download ${current.label}`;
-    $("#dlSize").textContent = fmtSize(current.filesize) || (current.ext || "mp4").toUpperCase();
+    const ext = (current.ext || "mp4").toUpperCase();
+    $("#dlLabel").textContent = current.kind === "audio" ? `Download audio (${ext})` : `Download ${current.label}${current.kind === "video" ? " · no sound" : ""}`;
+    $("#dlSize").textContent = fmtSize(current.filesize) || ext;
     $("#direct").href = current.url;
-    $("#dims").textContent = current.width && current.height ? `${current.width} × ${current.height}` : "";
+    $("#qNote").hidden = current.kind !== "video";
+    if (current.kind !== "audio") $("#dims").textContent = current.width && current.height ? `${current.width} × ${current.height}` : "";
   }
   qList.addEventListener("click", e => { const b = e.target.closest(".q-opt"); if (b) select(+b.dataset.i); });
   qList.addEventListener("keydown", e => {
@@ -1327,7 +1367,7 @@ addEventListener("DOMContentLoaded", () => {
 
     // who and when
     const handle = (d.uploader || "").trim();
-    const name = handle ? (p === "facebook" || /\s/.test(handle) || handle.startsWith("@") ? handle : "@" + handle) : `${NAMES[p]} creator`;
+    const name = handle ? (p === "facebook" || p === "youtube" || /\s/.test(handle) || handle.startsWith("@") ? handle : "@" + handle) : `${NAMES[p]} creator`;
     $("#avatar").textContent = name.replace(/^@/, "").charAt(0) || "?";
     $("#uploader").textContent = name;
     const date = fmtDate(d.upload_date);
@@ -1362,15 +1402,29 @@ addEventListener("DOMContentLoaded", () => {
       + (tags.length > 1 ? `<button type="button" class="all" data-copy="${esc(tags.join(" "))}" style="--i:${tags.length}">Copy all tags</button>` : "");
 
     // qualities
-    baseName = slug(captionText.split("#")[0] || d.title || handle);
-    qList.innerHTML = fmts.map((f, i) => `
-      <button type="button" class="q-opt" role="radio" data-i="${i}" style="--i:${i}">
+    baseName = slug(p === "youtube" ? d.title : (captionText.split("#")[0] || d.title || handle));
+    // Start on the best file that has sound; YouTube often has none, so fall back to the top quality
+    const shortSide = f => Math.min(f.width || 0, f.height || 0) || f.height || 0;
+    let pick = fmts.findIndex(f => f.kind === "av");
+    if (pick < 0) pick = fmts.findIndex(f => f.kind === "video" && shortSide(f) <= 720);
+    if (pick < 0) pick = Math.max(0, fmts.findIndex(f => f.kind === "video"));
+    qList.innerHTML = fmts.map((f, i) => {
+      const s = shortSide(f);
+      const badge = i === pick ? `<span class="tag">${i === 0 ? "Best" : "Suggested"}</span>`
+        : s >= 2160 ? '<span class="tag hd">4K</span>' : s >= 1440 ? '<span class="tag hd">2K</span>' : s >= 720 ? '<span class="tag hd">HD</span>' : "";
+      const res = f.kind === "audio" ? `<svg class="i" aria-hidden="true"><use href="#ph-music-notes"/></svg>Audio` : esc(f.label);
+      const bits = [(f.ext || "mp4").toUpperCase(), fmtSize(f.filesize), f.kind === "audio" && f.abr ? `${f.abr} kbps` : "", f.note].filter(Boolean).map(esc).join(" · ");
+      const silent = f.kind === "video" ? `<span class="q-silent"><svg class="i" aria-hidden="true"><use href="#ph-speaker-slash"/></svg>No sound</span>` : "";
+      return `
+      <button type="button" class="q-opt k-${f.kind}" role="radio" data-i="${i}" style="--i:${i}" aria-label="${esc(f.kind === "audio" ? "Audio only" : f.label + (f.kind === "video" ? ", no sound" : ""))}">
         <span class="dot" aria-hidden="true"></span>
-        <span class="q-res">${esc(f.label)}${i === 0 ? '<span class="tag">Best</span>' : ""}</span>
-        <span class="q-meta">${esc([(f.ext || "mp4").toUpperCase(), fmtSize(f.filesize), f.note].filter(Boolean).join(" · "))}</span>
-      </button>`).join("");
-    $("#qCount").textContent = `${fmts.length} option${fmts.length === 1 ? "" : "s"}`;
-    select(0);
+        <span class="q-res">${res}${badge}</span>
+        <span class="q-meta">${bits}</span>${silent}
+      </button>`;
+    }).join("");
+    const nVideo = fmts.filter(f => f.kind !== "audio").length;
+    $("#qCount").textContent = `${nVideo} ${nVideo === 1 ? "quality" : "qualities"}${fmts.some(f => f.kind === "audio") ? " + audio" : ""}`;
+    select(pick);
 
     result.classList.add("show");
     requestAnimationFrame(() => {

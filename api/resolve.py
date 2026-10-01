@@ -6,6 +6,7 @@ PLATFORMS = {
     "instagram": re.compile(r"^https?://(www\.)?instagram\.com/", re.I),
     "facebook": re.compile(r"^https?://(www\.|m\.|web\.|fb\.)?(facebook\.com|fb\.watch)/", re.I),
     "tiktok": re.compile(r"^https?://(www\.|vm\.|vt\.)?tiktok\.com/", re.I),
+    "youtube": re.compile(r"^https?://((www\.|m\.|music\.)?youtube\.com|youtu\.be)/", re.I),
 }
 
 def detect(url):
@@ -26,6 +27,8 @@ def b64(obj):
 
 def friendly(msg):
     m = msg.lower()
+    if "not a bot" in m or "confirm you" in m:
+        return "YouTube is blocking requests from this server right now. Try again later or try another video."
     if "login" in m or "cookies" in m or "rate-limit" in m or "not available" in m:
         return "This platform is asking for a login. The site owner can add cookies to fix this."
     if "private" in m:
@@ -46,40 +49,71 @@ def cdn_cookies(ydl, url, secret_names):
     pairs = [p.strip() for p in header.split(";") if p.strip()]
     return "; ".join(p for p in pairs if p.split("=", 1)[0] not in secret_names)
 
-def pick_formats(info, ydl, secret_names):
-    fmts = info.get("formats") or []
-    # progressive = video + audio in one file (no ffmpeg needed)
-    prog = [f for f in fmts if f.get("url") and f.get("vcodec") != "none" and f.get("acodec") != "none"]
-    if not prog and info.get("url"):
-        prog = [{"url": info["url"], "ext": info.get("ext", "mp4"), "height": info.get("height"), "http_headers": info.get("http_headers")}]
-    prog.sort(key=lambda f: (f.get("height") or 0, f.get("tbr") or 0), reverse=True)
+def short_side(f):
+    # "720p" means the short side, so a vertical 720x1280 reel is 720p, not 1280p
+    w, h = f.get("width"), f.get("height")
+    return min(w, h) if w and h else h
 
-    out, seen = [], set()
-    for f in prog:
-        w, h = f.get("width"), f.get("height")
-        # "720p" means the short side, so a vertical 720x1280 reel is 720p, not 1280p
-        short = min(w, h) if w and h else h
-        key = short or f.get("format_id")
-        if key in seen:
-            continue
-        seen.add(key)
-        label = f"{short}p" if short else (f.get("format_note") or "Video").upper()
+def compat(f):
+    """Prefer files that play everywhere: H.264 in MP4, then other MP4, then WebM."""
+    return (2 if f.get("ext") == "mp4" else 0) + (1 if (f.get("vcodec") or "").startswith("avc1") else 0)
+
+def pick_formats(info, ydl, secret_names, platform):
+    """Every quality the post actually has, one option per resolution.
+
+    kind "av"    video and sound in one file
+    kind "video" video only; YouTube keeps sound in a separate file and merging
+                 needs ffmpeg, which serverless hosting doesn't have
+    kind "audio" sound only
+    """
+    fmts = [f for f in info.get("formats") or []
+            if f.get("url") and (f.get("protocol") or "https") in ("http", "https")
+            and not str(f.get("format_id") or "").endswith("-drc")]
+    if not fmts and info.get("url"):
+        fmts = [{"url": info["url"], "ext": info.get("ext", "mp4"), "width": info.get("width"),
+                 "height": info.get("height"), "http_headers": info.get("http_headers")}]
+
+    av = [f for f in fmts if f.get("vcodec") != "none" and f.get("acodec") != "none"]
+    vo = [f for f in fmts if f.get("vcodec") not in ("none", None) and f.get("acodec") == "none"]
+    ao = [f for f in fmts if f.get("vcodec") == "none" and f.get("acodec") not in ("none", None)]
+
+    options = {}
+    for f in sorted(av, key=lambda f: (short_side(f) or 0, f.get("tbr") or 0), reverse=True):
+        options.setdefault(short_side(f) or f.get("format_id"), ("av", f))
+    # Silent files are only worth offering when there's nothing better at that size
+    if platform == "youtube" or not av:
+        for f in sorted(vo, key=lambda f: (short_side(f) or 0, compat(f), f.get("tbr") or 0), reverse=True):
+            if short_side(f):
+                options.setdefault(short_side(f), ("video", f))
+    ranked = sorted(options.values(), key=lambda kv: short_side(kv[1]) or 0, reverse=True)[:7]
+
+    best_audio = max(ao, key=lambda f: (f.get("ext") == "m4a", f.get("abr") or f.get("tbr") or 0), default=None)
+    if best_audio:
+        ranked.append(("audio", best_audio))
+
+    out = []
+    for kind, f in ranked:
+        s = short_side(f)
+        if kind == "audio":
+            label = "Audio"
+        else:
+            label = f"{s}p" if s else (f.get("format_note") or "Video").upper()
         headers = dict(f.get("http_headers") or {})
         ck = cdn_cookies(ydl, f["url"], secret_names)
         if ck:
             headers["Cookie"] = ck
         out.append({
             "label": label,
+            "kind": kind,
             "url": f["url"],
-            "ext": f.get("ext") or "mp4",
-            "width": w,
-            "height": h,
+            "ext": f.get("ext") or ("m4a" if kind == "audio" else "mp4"),
+            "width": f.get("width"),
+            "height": f.get("height"),
+            "abr": round(f["abr"]) if f.get("abr") else None,
             "filesize": f.get("filesize") or f.get("filesize_approx"),
             "note": "no watermark" if "nowm" in (f.get("format_id") or "").lower() else "",
             "h": b64(headers),
         })
-        if len(out) == 4:
-            break
     return out
 
 class handler(BaseHTTPRequestHandler):
@@ -100,7 +134,7 @@ class handler(BaseHTTPRequestHandler):
         url = (data.get("url") or "").strip()
         platform = detect(url)
         if not platform:
-            return self._json(400, {"error": "Only Instagram, Facebook and TikTok links are supported."})
+            return self._json(400, {"error": "Only Instagram, Facebook, TikTok and YouTube links are supported."})
 
         opts = {"quiet": True, "no_warnings": True, "noplaylist": True, "skip_download": True,
                 "cachedir": False, "socket_timeout": 20}
@@ -115,13 +149,13 @@ class handler(BaseHTTPRequestHandler):
                 if info.get("_type") == "playlist" or "entries" in info:   # carousel posts
                     entries = [e for e in (info.get("entries") or []) if e]
                     info = entries[0] if entries else {}
-                formats = pick_formats(info, ydl, secret_names)
+                formats = pick_formats(info, ydl, secret_names, platform)
         except yt_dlp.utils.DownloadError as e:
             return self._json(422, {"error": friendly(str(e))})
         except Exception:
             return self._json(500, {"error": "Something went wrong while fetching the video."})
 
-        if not formats:
+        if not any(f["kind"] != "audio" for f in formats):
             return self._json(422, {"error": "This post doesn't contain a downloadable video."})
 
         self._json(200, {

@@ -10,6 +10,7 @@ ALLOWED_DOMAINS = (
     "tiktok.com", "tiktokcdn.com", "tiktokcdn-us.com", "tiktokv.com", "tiktokv.us",
     "byteoversea.com", "ibytedtos.com", "muscdn.com", "ttwstatic.com",
     "akamaized.net",  # TikTok serves some videos from Akamai edge hosts
+    "googlevideo.com", "ytimg.com", "ggpht.com", "youtube.com",
 )
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 
